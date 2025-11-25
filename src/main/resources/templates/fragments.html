@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+    <header th:fragment="header">
+        <img th:src="@{/images/logo.png}" alt="lifemapLogo" class="logo"/>
+        <img th:src="@{/images/name.png}" alt="appName" class="logoName">
+    </header>
+    <footer th:fragment="footer">
+        <p>&copy; Lifemap App</p>
+        <p>Wybór języka</p>
+    </footer>
+
+    <aside th:fragment="navigationBar">
+        <nav>
+            <ul>
+                <li>
+                    <form th:action="@{/dashboard}" method="post">
+                        <button type="submit" class="navButton" name="home" th:title="#{html.button.home}">
+                            <img th:src="@{/images/home.png}" alt="homePage"/>
+                        </button>
+                    </form>
+                </li>
+                <li>
+                    <form th:action="@{/dashboard}" method="post">
+                        <button type="submit" class="navButton" name="lifeCircle" th:title="#{html.button.lifeCircle}">
+                            <img th:src="@{/images/lifecircle.png}" alt="lifeCirclePage"/>
+                        </button>
+                    </form>
+                </li>
+<!--                <li>-->
+<!--                    <form th:action="@{/dashboard}" method="post">-->
+<!--                        <button type="submit" class="navButton" th:title="#{html.button.calendar}">-->
+<!--                            <img th:src="@{/images/calendar.png}" alt="calendarPage"/>-->
+<!--                        </button>-->
+<!--                    </form>-->
+<!--                </li>-->
+<!--                <li>-->
+<!--                    <form th:action="@{/dashboard}" method="post">-->
+<!--                        <button type="submit" class="navButton" th:title="#{html.button.purpose}">-->
+<!--                            <img th:src="@{/images/aim.png}" alt="aimPage"/>-->
+<!--                        </button>-->
+<!--                    </form>-->
+<!--                </li>-->
+<!--                <li>-->
+<!--                    <form th:action="@{/dashboard}" method="post">-->
+<!--                        <button type="submit" class="navButton" th:title="#{html.button.stats}">-->
+<!--                            <img th:src="@{/images/stats.png}" alt="statsPage"/>-->
+<!--                        </button>-->
+<!--                    </form>-->
+<!--                </li>-->
+            </ul>
+            <div class="navSpacer"></div>
+            <ul>
+<!--                <li>-->
+<!--                    <form th:action="@{/dashboard}" method="post">-->
+<!--                        <button type="submit" class="navButton" th:title="#{html.button.settings}">-->
+<!--                            <img th:src="@{/images/settings.png}" alt="settingsPage"/>-->
+<!--                        </button>-->
+<!--                    </form>-->
+<!--                </li>-->
+                <li>
+                    <!-- name="logout"-->
+                    <form th:action="@{/logout}" method="post">
+                        <button type="submit" class="navButton" th:title="#{html.button.logout}">
+                            <img th:src="@{/images/logout.png}" alt="logoutPage"/>
+                        </button>
+                    </form>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+</html>

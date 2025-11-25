@@ -1,0 +1,24 @@
+<!doctype html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:thymeleaf="http://www.thymeleaf.org" lang="pl">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport"
+              content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <link rel="stylesheet" type="text/css" th:href="@{/css/style_index.css}"/>
+        <title>Lifemap - Home</title>
+    </head>
+    <body>
+        <main>
+            <a th:href="@{/(lang=${lang == 'pl' ? 'en' : 'pl'})}" class="btn-round">
+                <span th:text="${lang == 'pl' ? 'EN' : 'PL'}"></span>
+            </a>
+            <img src="/images/lifemap.png" th:src="@{/images/lifemap.png}" alt="lifemapLogo" class="logo"/>
+            <div class="buttonsDiv">
+                <a class="btn" th:text="#{html.loginPage.login.button}" th:href="@{/login}">Zaloguj się</a>
+                <a class="btn" th:text="#{html.registerPage.register}" th:href="@{/register}">Zarejestruj się</a>
+            </div>
+        </main>
+    </body>
+</html>

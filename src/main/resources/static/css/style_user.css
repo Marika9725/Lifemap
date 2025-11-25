@@ -1,0 +1,142 @@
+html {
+    height: 100%;
+}
+
+body {
+    background: #1C1C1D;
+    /*background: #2A2A2A;*/
+    color: #F0F0F0;
+    display: flex;
+    flex-direction: column;
+    /*min-height: 100vh;*/
+    height: 100%;
+    margin: 0;
+}
+
+/*HEADER ELEMENTS*/
+header {
+    background: #1C1C1D;
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: 100px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+}
+
+header img {
+    height: 100px;
+    width: auto;
+    display: block;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+img.logo {
+    left: 0;
+}
+
+img.logoName {
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/*CONTAINER ELEMENTS*/
+div.container {
+    display: flex;
+    flex: 1;
+    flex-direction: row;
+    /*min-height: 0;*/
+    height: 100%;
+}
+
+aside {
+    width: 100px;
+    background: #1C1C1D;
+
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    box-sizing: border-box;
+    padding: 10px 0;
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.5);
+}
+
+aside nav {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    flex: 1;
+}
+
+.navSpacer {
+    flex-grow: 1;
+    /*height: 80px;*/
+}
+
+aside nav ul {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: center;
+    padding: 0;
+    margin: 0;
+}
+
+ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+ul li {
+    color: goldenrod;
+    list-style: none;
+}
+
+button.navButton {
+    background-color: #1C1C1D;
+    border: none;
+    border-radius: 100px;
+    padding: 0;
+    height: 50px;
+    width: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow:
+            0 6px 15px rgba(0,0,0,0.6),
+            0 12px 30px rgba(0,0,0,0.4),
+            0 20px 40px rgba(0,0,0,0.3);
+}
+
+button.navButton:hover {
+    background-color: #2A2A2A;
+}
+
+button.navButton img {
+    height: 30px;       /* lekko mniejszy od przycisku, żeby było estetycznie */
+    width: auto;
+    display: block;
+    border-radius: 10px;
+
+    filter: brightness(0.9);
+    transition: filter 0.3s;
+}
+
+main {
+    width: 92%;
+    background: #2A2A2A;
+    border-radius: 10px;
+
+    padding: 20px 30px;
+    /*margin: 10px;*/
+}
+
+
+
+
+

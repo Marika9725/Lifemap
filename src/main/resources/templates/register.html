@@ -1,0 +1,55 @@
+<!doctype html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org" lang="pl">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport"
+              content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}">
+        <title>Lifemap - Register</title>
+    </head>
+    <body>
+        <main>
+            <div class="container">
+                <img th:src="@{/images/lifemap.png}" alt="lifemapLogo" class="logo"/>
+                <div class="content">
+                    <h2 th:text="#{html.registerPage.registration}">Rejestracja:</h2>
+                    <div class="buttonDiv">
+                        <a th:href="@{/register(lang=${lang == 'pl' ? 'en' : 'pl'})}" class="btn-round">
+                            <span th:text="${lang == 'pl' ? 'EN' : 'PL'}"></span>
+                        </a>
+                    </div>
+                    <form th:action="@{/register}" method="post" th:object="${user}">
+                        <p class="error" th:if="${#fields.hasGlobalErrors()}">Błąd formularza!</p>
+                        <label>Email:
+                            <input type="email" th:field="*{email}" required/>
+                            <span class="error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></span>
+                        </label>
+                        <label>
+                            <span th:text="#{html.registerPage.username}">Nazwa użytkownika:</span>
+                            <input type="text" th:field="*{username}">
+                            <span class="error" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></span>
+                        </label>
+                        <label>
+                            <span th:text="#{html.password}">Hasło:</span>
+                            <input type="password" th:field="*{password}" required>
+                            <span class="error" th:each="err : ${#fields.errors('password')}" th:text="${err}"></span>
+                        </label>
+                        <label>
+                            <span th:text="#{html.registerPage.confirmPassword}">Powtórz hasło:</span>
+                            <input type="password" name="confirmPassword" required>
+                            <span class="error" th:each="err : ${#fields.globalErrors()}" th:text="${err}"></span>
+                        </label>
+                        <button type="submit" class="btn" th:text="#{html.registerPage.register}">Zarejestruj się</button>
+                    </form>
+                    <p>
+                        <span th:text="#{html.registerPage.infoAsk}"></span>
+                        <a th:href="@{/login}" th:text="#{html.loginPage.login.button}">Zaloguj się</a>
+                    </p>
+                </div>
+            </div>
+        </main>
+<!--        <footer th:replace="fragments :: footer"></footer>-->
+    </body>
+</html>

@@ -1,0 +1,8 @@
+CREATE TABLE life_areas(
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(20) NOT NULL UNIQUE,
+    rate INT NOT NULL
+);
+
+ALTER TABLE users ADD COLUMN life_area_id INT NULL;
+ALTER TABLE users ADD FOREIGN KEY (life_area_id) REFERENCES life_areas(id);

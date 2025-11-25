@@ -1,0 +1,45 @@
+<!doctype html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:th="http://www.thymeleaf.org" lang="pl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}"/>
+    <title>Lifemap - Login</title>
+</head>
+<body>
+    <main>
+        <div class="container">
+            <img th:src="@{/images/lifemap.png}" alt="lifemapLogo" class="logo"/>
+            <div class="content">
+                <h2 th:text="#{html.loginPage.login.header}">Logowanie:</h2>
+                <div class="buttonDiv">
+                    <a th:href="@{/login(lang=${lang == 'pl' ? 'en' : 'pl'})}" class="btn-round">
+                        <span th:text="${lang == 'pl' ? 'EN' : 'PL'}"></span>
+                    </a>
+                </div>
+                <form th:action="@{/login}" method="post" th:object="${user}">
+                    <label>E-mail:
+                        <input type="email" th:field="*{email}" required>
+                    </label>
+                    <label>
+                        <span th:text="#{html.password}">Hasło: </span>
+                        <input type="password" th:field="*{password}" required>
+                    </label>
+                    <button type="submit" th:text="#{html.loginPage.login.button}" class="btn">Zaloguj się</button>
+<!--                    <span class="error-login" th:each="err : ${#fields.globalErrors()}" th:text="${#messages.msgOrNull(err)}"></span>-->
+                    <span class="error-login" th:if="${param.error}" th:text="#{user.invalid.login}"></span>
+                </form>
+                <p>
+                    <span th:text="#{html.loginPage.infoAsk}"></span>
+                    <a th:href="@{/register}" th:text="#{html.registerPage.register}">Zarejestruj się</a>
+                </p>
+            </div>
+        </div>
+    </main>
+<!--    <footer th:replace="fragments :: footer"></footer>-->
+</body>
+</html>

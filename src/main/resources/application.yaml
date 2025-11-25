@@ -1,0 +1,9 @@
+spring:
+  application.name: 'Lifemap'
+  messages:
+    basename: messages
+    encoding: UTF-8
+  profiles:
+    active: 'local'
+  web:
+    locale: pl_PL

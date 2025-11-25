@@ -1,0 +1,57 @@
+package com.lifemap.controller;
+
+import com.lifemap.model.*;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.web.servlet.MockMvc;
+
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+@SpringBootTest
+@AutoConfigureMockMvc
+@ActiveProfiles("integration")
+class HomeControllerIntegrationTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Test
+    public void shouldSuccessfullyRegisterUser() throws Exception {
+        mockMvc.perform(post("/register")
+                        .with(csrf())
+                        .param("username", "TestUser")
+                        .param("password", "#Password123")
+                        .param("email", "user@example.com")
+                        .param("confirmPassword", "#Password123")
+                )
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl("/login"));
+
+        var user = userRepository.findByEmail("user@example.com").get();
+
+        assertNotNull(user);
+        assertThat(user.getId(), is(1L));
+        assertThat(user.getUsername(), is("TestUser"));
+        assertTrue(passwordEncoder.matches("#Password123", user.getPassword()));
+        assertThat(user.getRole(), is(Role.ROLE_USER));
+        assertThat(user.getEmail(), is("user@example.com"));
+    }
+
+
+
+}
