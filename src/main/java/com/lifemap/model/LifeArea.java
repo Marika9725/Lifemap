@@ -4,10 +4,8 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
-import java.util.List;
-
-/*@Entity
-@Table(name = "lifeAreas")
+@Entity
+@Table(name = "life_areas")
 @NoArgsConstructor
 @Getter @Setter
 public class LifeArea {
@@ -15,13 +13,16 @@ public class LifeArea {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Setter(AccessLevel.PRIVATE)
     private Long id;
+
     @Size(min = 3, max = 20, message = "{lifeArea.invalid.size}")
-    @NotBlank
+    @NotBlank(message = "{lifeArea.invalid.name}")
     private String name;
-    @Min(0)
-    @Max(10)
+
+    @Min(value = 0, message = "{lifeArea.invalid.rate}")
+    @Max(value = 10, message = "{lifeArea.invalid.rate}")
     private int rate;
+
     @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
-}*/
+    @JoinColumn(name = "wheel_of_life_id")
+    private WheelOfLife wheelOfLife;
+}

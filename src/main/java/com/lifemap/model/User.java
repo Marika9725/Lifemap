@@ -1,10 +1,7 @@
 package com.lifemap.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.*;
 import lombok.*;
-
-import java.util.*;
 
 @Entity
 @Table(name = "users")
@@ -25,10 +22,7 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "life_circle_id")
-    private LifeCircle lifeCircle;
-
-//    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-//    private Set<LifeArea> lifeAreas;
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "wheel_of_life_id")
+    private WheelOfLife wheelOfLife;
 }
