@@ -32,9 +32,9 @@ public class DashboardController {
 
         if (user == null) return "redirect:/login";
 
-        var lifeCircle = user.getLifeAreas();
 
-        model.addAttribute("lifeCircle", lifeCircle);
+
+//        model.addAttribute("lifeCircle", lifeCircle);
 
         return "dashboard_lifeCircle";
     }

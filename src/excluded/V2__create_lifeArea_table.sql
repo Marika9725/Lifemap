@@ -4,5 +4,5 @@ CREATE TABLE life_areas(
     rate INT NOT NULL
 );
 
-ALTER TABLE users ADD COLUMN life_area_id INT NULL;
+ALTER TABLE users ADD COLUMN life_area_id INT NOT NULL;
 ALTER TABLE users ADD FOREIGN KEY (life_area_id) REFERENCES life_areas(id);
