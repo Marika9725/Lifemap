@@ -32,6 +32,7 @@ public class UserService {
         }
 
         if (!result.hasErrors()) {
+            //TODO: add saving with WheelOfLife and basic LifeAreas
             var saved = repo.save(toSave.toUser(encoder));
             return saved.getId() != null;
         }

@@ -1,7 +1,7 @@
 package com.lifemap.controller;
 
-import com.lifemap.model.UserRepository;
-import com.sun.security.auth.UserPrincipal;
+import com.lifemap.model.*;
+import com.lifemap.model.projection.WheelOfLifeDTO;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Controller;
@@ -26,21 +26,21 @@ public class DashboardController {
         return "redirect:/dashboard";
     }
 
-    @GetMapping("/lifeCircle")
-    public String showLifeCircle(@AuthenticationPrincipal User actualUser, Model model) {
-        var user = repository.findByEmail(actualUser.getUsername()).get();
+    @GetMapping("/wheelOfLife")
+    public String showWheelOfLife(@AuthenticationPrincipal User actualUser, Model model) {
+        var optionalUser = repository.findByEmail(actualUser.getUsername());
 
-        if (user == null) return "redirect:/login";
+        if (optionalUser.isEmpty()) return "redirect:/logout";
+        var user = optionalUser.get();
+        var wheelOfLifeDTO = new WheelOfLifeDTO(user.getWheelOfLife());
 
+        model.addAttribute("wheelOfLife", wheelOfLifeDTO);
 
-
-//        model.addAttribute("lifeCircle", lifeCircle);
-
-        return "dashboard_lifeCircle";
+        return "dashboard_wheelOfLife";
     }
 
-    @PostMapping(params = "lifeCircle")
-    public String showLifeCircle(Model model) {
-        return "redirect:/dashboard/lifeCircle";
+    @PostMapping(params = "wheelOfLife")
+    public String shoWheelOfLife(Model model) {
+        return "redirect:/dashboard/wheelOfLife";
     }
 }
