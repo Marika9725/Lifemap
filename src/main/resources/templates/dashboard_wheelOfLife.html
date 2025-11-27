@@ -8,8 +8,8 @@
               content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
         <meta http-equiv="X-UA-Compatible" content="ie=edge">
         <link rel="stylesheet" type="text/css" th:href="@{/css/style_user.css}"/>
-        <link rel="stylesheet" type="text/css" th:href="@{/css//style_user_lifeCircle.css}"/>
-        <title>Lifemap App - LifeCircle</title>
+        <link rel="stylesheet" type="text/css" th:href="@{/css/style_user_wheelOfLife.css}"/>
+        <title>Lifemap App - The Wheel of Life</title>
     </head>
     <body>
         <header th:replace="fragments :: header"></header>
@@ -17,7 +17,58 @@
         <div class="container">
             <aside th:replace="fragments :: navigationBar"></aside>
             <main>
+                <div class="leftPart">
+                    <div class="wheelOfLife">
+                        <canvas id="wheelChart" style="width: 100%; height: 100%;"></canvas>
+                    </div>
 
+                    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+                    <script th:inline="javascript">
+                        const areas = /*[[${areas}]]*/ [];
+                    </script>
+
+                    <script src="/js/wheelOfLife.js"></script>
+                    <div class="separator"></div>
+                </div>
+                <div class="rightPart">
+                    <h2 th:text="#{html.wheelOfLifePage.header}">Obszary życia</h2>
+
+                    <table>
+                        <tr th:each="area : ${areas}">
+                            <td>
+                                <a href="#" th:text="${area.name}">-</a>
+                            </td>
+                            <td>
+                                <p th:text="|${area.rate} / 10|"></p>
+                            </td>
+                            <td>
+                                <button type="submit" th:title="#{html.wheelOfLifePage.increaseRating}">+</button>
+                                <button type="submit" th:title="#{html.wheelOfLifePage.decreaseRating}">-</button>
+                                <button type="submit" class="removeBtn" th:title="#{html.wheelOfLifePage.button.removeArea}">
+                                    <img th:src="@{/images/remove.png}" alt="removeArea"/>
+                                </button>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <div class="spacer"></div>
+
+                    <p>
+                        <span class="bold" th:text="#{html.wheelOfLifePage.average}"></span>
+                        <span th:text="${average}"></span>
+                    </p>
+
+                    <div class="separator-row"></div>
+
+                    <div class="addLifeArea">
+                        <form method="post" th:action="@{/dashboard/wheelOfLife}">
+                            <input type="text" maxLength="20" th:placeholder="#{html.wheelOfLifePage.areaName}"/>
+                            <input type="number" min="0" max="10" th:placeholder="#{html.wheelOfLifePage.areaRate}"/>
+                            <button type="submit" th:text="#{html.wheelOfLifePage.button.addArea}">Dodaj obszar</button>
+                        </form>
+                    </div>
+                </div>
             </main>
         </div>
     </body>

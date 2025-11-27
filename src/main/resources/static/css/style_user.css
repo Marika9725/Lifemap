@@ -106,7 +106,8 @@ button.navButton {
     justify-content: center;
     cursor: pointer;
 
-    transition: transform 0.2s, box-shadow 0.2s;
+    /*transition: transform 0.3s, box-shadow 0.3s;*/
+    transition: all 0.3s;
     box-shadow:
             0 6px 15px rgba(0,0,0,0.6),
             0 12px 30px rgba(0,0,0,0.4),
@@ -114,6 +115,7 @@ button.navButton {
 }
 
 button.navButton:hover {
+    transition: all 0.3s;
     background-color: #2A2A2A;
 }
 

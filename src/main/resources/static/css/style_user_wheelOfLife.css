@@ -1,0 +1,202 @@
+main {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
+.wheelOfLife, .rightPart {
+    background-color: #1C1C1D;
+    border-radius: 10px;
+}
+
+h2, p, input, a:hover {
+    color: goldenrod;
+}
+
+button {
+    color: goldenrod;
+    background: #2A2A2A;
+    transition: all 0.3s;
+    cursor: pointer;
+}
+
+/* LEFT PART */
+.leftPart {
+    display: flex;
+    flex-direction: row;
+    flex: 1 1 500px;
+    align-items: center;
+}
+
+.wheelOfLife {
+    width: 90%;
+    max-width: 900px;
+    height: 100%;
+    margin: 0 auto;
+}
+
+.separator {
+    border-left: 1px solid peru;
+    height: 300px;
+}
+
+/* RIGHT PART */
+.rightPart {
+    display: flex;
+    flex-direction: column;
+    flex: 2 1 500px;
+    margin-left: 20px;
+    padding: 0 30px;
+}
+
+h2 {
+    font: 26px bold;
+}
+
+table {
+    margin-left: 60px;
+    border-collapse: collapse;
+}
+
+p {
+    text-transform: uppercase;
+    text-align: center;
+    margin: 0;
+}
+
+.spacer {
+    flex-grow: 1;
+    height: 100%;
+}
+
+span.bold {
+    font-weight: bold;
+}
+
+.separator-row {
+    display: block;
+    border-bottom: 1px solid peru;
+    width: 300px;
+    margin: 20px auto;
+}
+
+.addLifeArea {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.addLifeArea form input {
+    background: #2A2A2A;
+    border: none;
+    border-radius: 10px;
+    caret-color: goldenrod;
+    padding: 5px 8px;
+}
+
+input:focus {
+    outline: none;
+    box-shadow: 0 0 5px goldenrod;
+}
+
+.addLifeArea form button {
+    padding: 5px 20px;
+    border: solid 2px goldenrod;
+    border-radius: 10px;
+}
+
+.addLifeArea form button:hover {
+    background: goldenrod;
+    color: #2A2A2A;
+}
+
+/* TABLE ELEMENTS */
+tr:nth-last-child(2) {
+    padding-bottom: 0;
+}
+
+tr:last-child td {
+    border-bottom: none !important;
+}
+
+tr td {
+    padding-right: 5px;
+    border-bottom: 1px solid peru;
+    padding-bottom: 5px;
+    padding-top: 5px;
+}
+
+tr td:nth-last-child(2) {
+    padding-right: 15px;
+    border-right: 1px solid peru;
+}
+
+tr td:last-child {
+    padding-left: 15px;
+    width: 120px;
+}
+
+tr td:last-child button {
+    margin-left: 8px;
+}
+
+td p {
+    display: inline;
+    margin-left: 8px;
+}
+
+table tr td button {
+    text-decoration: none;
+    border: none;
+    border-radius: 100px;
+    cursor: pointer;
+    height: 25px;
+    width: 25px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
+    box-shadow:
+            0 6px 15px rgba(0, 0, 0, 0.6),
+            0 12px 30px rgba(0, 0, 0, 0.5),
+            0 20px 40px rgba(0, 0, 0, 0.4),
+            0 30px 60px rgba(0, 0, 0, 0.3),
+            0 40px 80px rgba(0, 0, 0, 0.2);
+}
+
+table tr td button:hover {
+    transition: all 0.3s;
+    background: goldenrod;
+    color: #2A2A2A;
+}
+
+button.removeBtn {
+    height: 25px;
+    border: none;
+    border-radius: 100px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+button.removeBtn img {
+    height: 20px;
+    width: auto;
+    border-radius: 10px;
+    object-fit: contain;
+    display: block;
+}
+
+a {
+    text-decoration: none;
+    color: darkgoldenrod;
+    text-transform: uppercase;
+}
+
+a:hover {
+    font-weight: bold;
+}

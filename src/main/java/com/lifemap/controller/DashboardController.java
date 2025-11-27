@@ -1,6 +1,6 @@
 package com.lifemap.controller;
 
-import com.lifemap.model.*;
+import com.lifemap.model.UserRepository;
 import com.lifemap.model.projection.WheelOfLifeDTO;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.User;
@@ -34,13 +34,15 @@ public class DashboardController {
         var user = optionalUser.get();
         var wheelOfLifeDTO = new WheelOfLifeDTO(user.getWheelOfLife());
 
-        model.addAttribute("wheelOfLife", wheelOfLifeDTO);
+        model.addAttribute("areas", wheelOfLifeDTO.getLifeAreas());
+        //TODO: change calculateAverage() to variable in wheelOfLifeDTO and wheelOfLife entity ???
+        model.addAttribute("average", wheelOfLifeDTO.calculateAverage());
 
         return "dashboard_wheelOfLife";
     }
 
     @PostMapping(params = "wheelOfLife")
-    public String shoWheelOfLife(Model model) {
+    public String shoWheelOfLife() {
         return "redirect:/dashboard/wheelOfLife";
     }
 }
