@@ -16,20 +16,9 @@ import org.springframework.web.bind.annotation.*;
 @Controller
 @RequestMapping("/")
 public class HomeController {
-//    private final UserRepository repo;
-//    private final PasswordEncoder encoder;
-
     private final UserService service;
 
-    @Autowired
-    MessageSource messageSource;
-
     public HomeController(UserService service) {this.service = service;}
-
-//    public HomeController(UserRepository repo, PasswordEncoder encoder) {
-//        this.repo = repo;
-//        this.encoder = encoder;
-//    }
 
     @GetMapping
     public String home(@RequestParam(value = "lang", defaultValue = "pl") String lang, Model model) {
