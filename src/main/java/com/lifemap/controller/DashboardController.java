@@ -38,7 +38,6 @@ public class DashboardController {
         return "redirect:/dashboard/wheelOfLife";
     }
 
-    //TODO: test it!
     @GetMapping("/wheelOfLife")
     public String showWheelOfLife(@AuthenticationPrincipal User actualUser, Model model) {
         var user = fetchCurrentUser(actualUser);
@@ -63,16 +62,13 @@ public class DashboardController {
 
         var isLifeAreaAdded = service.addLifeArea(toSave, wheelOfLife, result);
 
-        addAttributes(wheelOfLife, model);
-
         if (result.hasErrors() || !isLifeAreaAdded) {
+            addAttributes(wheelOfLife, model);
             model.addAttribute("newLifeArea", toSave);
             return "dashboard_wheelOfLife";
         }
 
-        model.addAttribute("newLifeArea", new LifeAreaDTO());
-
-        return "redirect:/dashboard/dashboard_wheelOfLife";
+        return "redirect:/dashboard/wheelOfLife";
     }
 
     private com.lifemap.model.User fetchCurrentUser(User actualUser) {
@@ -86,6 +82,7 @@ public class DashboardController {
 
         model.addAttribute("areas", wheelOfLifeDTO.getLifeAreas());
         //TODO: change calculateAverage() to variable in wheelOfLifeDTO and wheelOfLife entity ???
+        //TODO: move calculateAverage() to WheelOfLifeService
         model.addAttribute("average", wheelOfLifeDTO.calculateAverage());
     }
 }
