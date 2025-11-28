@@ -13,6 +13,9 @@ import java.util.stream.Collectors;
 public class WheelOfLifeService {
     @Autowired
     private MessageSource messageSource;
+    private final  LifeAreaRepository lifeAreaRepository;
+
+    public WheelOfLifeService(LifeAreaRepository lifeAreaRepository) {this.lifeAreaRepository = lifeAreaRepository;}
 
 
     //TODO: test -> shouldCreateDefaultWheelOfLife()
@@ -42,5 +45,14 @@ public class WheelOfLifeService {
         );
 
         return wheelOfLife;
+    }
+
+    //TODO: test it!
+    public LifeArea addLifeArea(LifeArea lifeArea, WheelOfLife wheelOfLife) {
+        if (lifeArea != null) {
+            wheelOfLife.getLifeAreas().add(lifeArea);
+        }
+
+        return wheelOfLife.getLifeAreas().contains(lifeArea) ?  lifeArea : null;
     }
 }

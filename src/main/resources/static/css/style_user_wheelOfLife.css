@@ -113,6 +113,15 @@ input:focus {
     color: #2A2A2A;
 }
 
+.errors {
+    margin-top: 10px;
+}
+
+.error {
+    text-transform: none;
+    font-size: 14px;
+}
+
 /* TABLE ELEMENTS */
 tr:nth-last-child(2) {
     padding-bottom: 0;

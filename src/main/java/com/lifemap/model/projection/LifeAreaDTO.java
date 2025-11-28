@@ -4,9 +4,10 @@ import com.lifemap.model.LifeArea;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
+//TODO: test it!
 @Getter
 @Setter
-//@NoArgsConstructor
+@NoArgsConstructor
 //@AllArgsConstructor
 public class LifeAreaDTO {
     @Size(min = 3, max = 20, message = "{lifeArea.invalid.size}")
@@ -20,6 +21,15 @@ public class LifeAreaDTO {
     public LifeAreaDTO(LifeArea lifeArea) {
         this.name = lifeArea.getName();
         this.rate = lifeArea.getRate();
+    }
+
+    //TODO: test it!
+    public LifeArea toLifeArea() {
+        var lifeArea = new LifeArea();
+        lifeArea.setName(this.name);
+        lifeArea.setRate(this.rate);
+
+        return lifeArea;
     }
 
 }

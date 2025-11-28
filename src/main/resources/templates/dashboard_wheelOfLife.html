@@ -62,10 +62,14 @@
                     <div class="separator-row"></div>
 
                     <div class="addLifeArea">
-                        <form method="post" th:action="@{/dashboard/wheelOfLife}">
-                            <input type="text" maxLength="20" th:placeholder="#{html.wheelOfLifePage.areaName}"/>
-                            <input type="number" min="0" max="10" th:placeholder="#{html.wheelOfLifePage.areaRate}"/>
+                        <form method="post" th:action="@{/dashboard/wheelOfLife}" th:object="${newLifeArea}">
+                            <input type="text" maxLength="20" th:placeholder="#{html.wheelOfLifePage.areaName}" th:field="*{name}"/>
+                            <input type="number" min="0" max="10" th:placeholder="#{html.wheelOfLifePage.areaRate}" th:field="*{rate}"/>
                             <button type="submit" th:text="#{html.wheelOfLifePage.button.addArea}">Dodaj obszar</button>
+                            <div class="errors" th:if="${#fields.hasAnyErrors()}">
+                                <p class="error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></p>
+                                <p class="error" th:if="${#fields.hasErrors('rate')}" th:errors="*{rate}"></p>
+                            </div>
                         </form>
                     </div>
                 </div>
