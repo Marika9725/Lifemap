@@ -47,13 +47,20 @@ button {
     flex: 2 1 500px;
     margin-left: 20px;
     padding: 0 30px;
+    height: 100%;
 }
 
 h2 {
     font: 26px bold;
 }
 
-table {
+.scrollable-table {
+    max-height: 250px;
+    overflow-y: auto;
+    margin-bottom: 20px;
+}
+
+.scrollable-table table {
     margin-left: 60px;
     border-collapse: collapse;
 }
@@ -62,11 +69,6 @@ p {
     text-transform: uppercase;
     text-align: center;
     margin: 0;
-}
-
-.spacer {
-    flex-grow: 1;
-    height: 100%;
 }
 
 span.bold {
@@ -87,6 +89,7 @@ span.bold {
     justify-content: center;
     align-items: center;
     margin-bottom: 15px;
+    margin-top: auto;
 }
 
 .addLifeArea form input {

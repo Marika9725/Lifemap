@@ -34,34 +34,36 @@
                 <div class="rightPart">
                     <h2 th:text="#{html.wheelOfLifePage.header}">Obszary życia</h2>
 
-                    <table>
-                        <tr th:each="area : ${areas}">
-                            <td>
-                                <a href="#" th:text="${area.name}">-</a>
-                            </td>
-                            <td>
-                                <p th:text="|${area.rate} / 10|"></p>
-                            </td>
-                            <td>
-                                <button type="submit" th:title="#{html.wheelOfLifePage.increaseRating}">+</button>
-                                <button type="submit" th:title="#{html.wheelOfLifePage.decreaseRating}">-</button>
-                                <button type="submit" class="removeBtn" th:title="#{html.wheelOfLifePage.button.removeArea}">
-                                    <img th:src="@{/images/remove.png}" alt="removeArea"/>
-                                </button>
-                            </td>
-                        </tr>
-                    </table>
+                    <div class="scrollable-table">
+                        <table>
+                            <tr th:each="area : ${areas}">
+                                <td>
+                                    <a href="#" th:text="${area.name}">-</a>
+                                </td>
+                                <td>
+                                    <p th:text="|${area.rate} / 10|"></p>
+                                </td>
+                                <td>
+                                    <button type="submit" th:title="#{html.wheelOfLifePage.increaseRating}">+</button>
+                                    <button type="submit" th:title="#{html.wheelOfLifePage.decreaseRating}">-</button>
+                                    <button type="submit" class="removeBtn" th:title="#{html.wheelOfLifePage.button.removeArea}">
+                                        <img th:src="@{/images/remove.png}" alt="removeArea"/>
+                                    </button>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
 
-                    <div class="spacer"></div>
-
-                    <p>
-                        <span class="bold" th:text="#{html.wheelOfLifePage.average}"></span>
-                        <span th:text="${average}"></span>
-                    </p>
-
-                    <div class="separator-row"></div>
+<!--                    <div class="spacer"></div>-->
 
                     <div class="addLifeArea">
+                        <p>
+                            <span class="bold" th:text="#{html.wheelOfLifePage.average}"></span>
+                            <span th:text="${average}"></span>
+                        </p>
+
+                        <div class="separator-row"></div>
+
                         <form method="post" th:action="@{/dashboard/wheelOfLife}" th:object="${newLifeArea}">
                             <input type="text" maxLength="20" th:placeholder="#{html.wheelOfLifePage.areaName}" th:field="*{name}"/>
                             <input type="number" min="0" max="10" th:placeholder="#{html.wheelOfLifePage.areaRate}" th:field="*{rate}"/>
