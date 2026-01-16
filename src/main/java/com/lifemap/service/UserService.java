@@ -26,7 +26,6 @@ public class UserService {
         this.wheelOfLifeService = wheelOfLifeService;
     }
 
-    //TODO: test -> savedUserShouldHaveDefaultWheelOfLife
     @Transactional
     public boolean register(UserDTO toSave, BindingResult result, String confirmPassword) {
         validUserData(toSave, result, confirmPassword);

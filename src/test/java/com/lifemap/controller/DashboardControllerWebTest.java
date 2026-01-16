@@ -1,5 +1,6 @@
 package com.lifemap.controller;
 
+import com.lifemap.TestUtils;
 import com.lifemap.config.SecurityConfig;
 import com.lifemap.model.*;
 import com.lifemap.model.projection.LifeAreaDTO;
@@ -37,6 +38,11 @@ class DashboardControllerWebTest {
 
     @MockitoBean
     private LifeAreaService lifeAreaService;
+
+    @MockitoBean
+    private WheelOfLifeService wheelOfLifeService;
+
+    private final TestUtils testUtils = new TestUtils();
 
     @Nested
     class HttpGET_dashboard {
@@ -101,7 +107,7 @@ class DashboardControllerWebTest {
         @WithMockUser
         public void shouldReturnWheelOfLifePage() throws Exception {
             //given
-            var user = createUser();
+            var user = testUtils.createTestUserWithWheelOfLifeAndLifeAreas();
 
             when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
 
@@ -154,7 +160,7 @@ class DashboardControllerWebTest {
         @WithMockUser
         public void shouldReturnWheelOfLifePageWithSubmittedDataWhenAddingLifeAreaFails() throws Exception {
             //given
-            var user = createUser();
+            var user = testUtils.createTestUserWithWheelOfLifeAndLifeAreas();
 
             when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
             when(lifeAreaService.addLifeArea(
@@ -182,7 +188,7 @@ class DashboardControllerWebTest {
         @WithMockUser
         public void shouldAddAverageAndAreasAttributesWhenAddingLifeAreaFails() throws Exception {
             //given
-            var user = createUser();
+            var user = testUtils.createTestUserWithWheelOfLifeAndLifeAreas();
 
             when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
             when(lifeAreaService.addLifeArea(
@@ -211,7 +217,7 @@ class DashboardControllerWebTest {
         @WithMockUser
         public void shouldRedirectToWheelOfLifePageWithNewLifeAreaDTOWhenAddingLifeAreaIsSuccessful() throws Exception {
             //given
-            var user = createUser();
+            var user = testUtils.createTestUserWithWheelOfLifeAndLifeAreas();
 
             when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
             when(lifeAreaService.addLifeArea(
@@ -238,14 +244,5 @@ class DashboardControllerWebTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl("/"))
                 .andExpect(request().sessionAttributeDoesNotExist("SPRING_SECURITY_CONTEXT"));
-    }
-
-    private static User createUser() {
-        var user = new User();
-        var wheelOfLife = new WheelOfLife();
-        wheelOfLife.setLifeAreas(Set.of(new LifeArea()));
-        user.setWheelOfLife(wheelOfLife);
-
-        return user;
     }
 }

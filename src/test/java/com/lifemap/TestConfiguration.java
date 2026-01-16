@@ -13,8 +13,14 @@ public class TestConfiguration {
     @Primary
     @Profile("integration")
     DataSource dataSource() {
-        var result = new DriverManagerDataSource("jdbc:h2:mem:test;DB_CLOSE_DELAY=-1", "sa", "");
+        var dbName = "test-" + UUID.randomUUID();
+        var result = new DriverManagerDataSource(
+                "jdbc:h2:mem:" + dbName + ";DB_CLOSE_DELAY=-1",
+                "sa",
+                ""
+        );
         result.setDriverClassName("org.h2.Driver");
+
         return result;
     }
 

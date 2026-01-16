@@ -9,18 +9,15 @@ import org.springframework.validation.BindingResult;
 public class LifeAreaService {
 
     private final LifeAreaRepository lifeAreaRepository;
-    private final WheelOfLifeService wheelOfLifeService;
 
-    public LifeAreaService(LifeAreaRepository lifeAreaRepository, WheelOfLifeService wheelOfLifeService) {this.lifeAreaRepository = lifeAreaRepository;
-        this.wheelOfLifeService = wheelOfLifeService;
+    public LifeAreaService(LifeAreaRepository lifeAreaRepository) {
+        this.lifeAreaRepository = lifeAreaRepository;
     }
 
-    //TODO: test it!
     public boolean addLifeArea(LifeAreaDTO toSave, WheelOfLife wheelOfLife, BindingResult result) {
+        if (toSave == null || wheelOfLife == null || result == null) return false;
 
-        if (lifeAreaRepository.existsByNameAndWheelOfLifeId(toSave.getName(), wheelOfLife.getId())) {
-            result.rejectValue("name", "lifeArea.invalid.name.alreadyExists");
-        }
+        validLifeAreaData(toSave, wheelOfLife.getId(), result);
 
         if (result.hasErrors()) return false;
 
@@ -33,10 +30,24 @@ public class LifeAreaService {
         return false;
     }
 
+    private void validLifeAreaData(LifeAreaDTO toSave, Long wheelOfLifeId, BindingResult result) {
+        if (toSave.getName() == null || toSave.getName().isBlank()) {
+            result.rejectValue("name", "lifeArea.invalid.name");
+        }
+
+        if (toSave.getName() != null && lifeAreaRepository.existsByNameAndWheelOfLifeId(toSave.getName(), wheelOfLifeId)) {
+            result.rejectValue("name", "lifeArea.invalid.name.alreadyExists");
+        }
+    }
+
     private LifeArea createNewLifeArea(LifeAreaDTO toSave, WheelOfLife wheelOfLife) {
         var lifeArea = toSave.toLifeArea();
-        lifeArea.setWheelOfLife(wheelOfLife);
 
-        return wheelOfLifeService.addLifeArea(lifeArea, wheelOfLife);
+        if (lifeArea == null) return null;
+
+        lifeArea.setWheelOfLife(wheelOfLife);
+        wheelOfLife.getLifeAreas().add(lifeArea);
+
+        return wheelOfLife.getLifeAreas().contains(lifeArea) ? lifeArea : null;
     }
 }

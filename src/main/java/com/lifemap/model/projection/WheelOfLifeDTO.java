@@ -6,10 +6,7 @@ import lombok.*;
 import java.util.*;
 import java.util.stream.Collectors;
 
-//@Getter
 @Setter
-//@NoArgsConstructor
-//@AllArgsConstructor
 public class WheelOfLifeDTO {
     private Set<LifeAreaDTO> lifeAreas;
 
@@ -23,11 +20,5 @@ public class WheelOfLifeDTO {
         return lifeAreas.stream()
                 .sorted(Comparator.comparing(LifeAreaDTO::getName))
                 .collect(Collectors.toList());
-    }
-
-    ///TODO: migrate this to WheelOfLifeService
-    public double calculateAverage() {
-        var average = lifeAreas.stream().mapToDouble(LifeAreaDTO::getRate).sum() / (double) lifeAreas.size();
-        return Math.round(average * 100.0) / 100.0;
     }
 }

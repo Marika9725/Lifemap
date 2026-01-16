@@ -15,4 +15,5 @@ import java.util.*;
 public interface SqlUserRepository extends UserRepository, JpaRepository<User, Long> {
     List<User> findUsersByEmailOrUsername(String email, String username);
     Optional<User> findByUsername(String username);
+//    boolean deleteByEmail(String email);
 }

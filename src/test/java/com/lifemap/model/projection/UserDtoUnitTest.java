@@ -2,8 +2,12 @@ package com.lifemap.model.projection;
 
 import com.lifemap.model.Role;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.*;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+
+import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
@@ -69,6 +73,19 @@ class UserDtoUnitTest {
 
             //assertThat
             assertThat(user.getRole(), is(expected));
+        }
+
+        @Test
+        void shouldNotCreateUserWhenDTOHasBlankData() {
+            //given
+            var userDTO = new UserDTO();
+            userDTO.setPassword("#Password123");
+
+            //when
+            var user = userDTO.toUser(encoder);
+
+            //then
+            assertThat(user, is(nullValue()));
         }
     }
 }

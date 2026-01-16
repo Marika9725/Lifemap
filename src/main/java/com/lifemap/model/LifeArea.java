@@ -11,7 +11,6 @@ import lombok.*;
 public class LifeArea {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Setter(AccessLevel.PRIVATE)
     private Long id;
 
     private String name;

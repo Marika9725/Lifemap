@@ -28,6 +28,8 @@ public class UserDTO {
     private String password;
 
     public User toUser(PasswordEncoder encoder) {
+        if (email == null || username == null || password == null) return null;
+
         var user = new User();
         user.setEmail(email);
         user.setUsername(username);

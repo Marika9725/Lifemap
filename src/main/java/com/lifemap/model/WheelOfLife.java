@@ -3,7 +3,7 @@ package com.lifemap.model;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Table(name = "wheels_of_life")
@@ -18,5 +18,5 @@ public class WheelOfLife {
     private User user;
 
     @OneToMany(mappedBy = "wheelOfLife", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<LifeArea> lifeAreas;
+    private Set<LifeArea> lifeAreas = new HashSet<>();
 }

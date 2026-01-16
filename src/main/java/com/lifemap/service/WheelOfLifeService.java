@@ -1,6 +1,7 @@
 package com.lifemap.service;
 
 import com.lifemap.model.*;
+import com.lifemap.model.projection.LifeAreaDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -11,31 +12,26 @@ import java.util.stream.Collectors;
 
 @Service
 public class WheelOfLifeService {
-    @Autowired
-    private MessageSource messageSource;
-    private final  LifeAreaRepository lifeAreaRepository;
+    private final MessageSource messageSource;
+    private final LifeAreaRepository lifeAreaRepository;
 
-    public WheelOfLifeService(LifeAreaRepository lifeAreaRepository) {this.lifeAreaRepository = lifeAreaRepository;}
+    public WheelOfLifeService(LifeAreaRepository lifeAreaRepository, MessageSource messageSource) {this.lifeAreaRepository = lifeAreaRepository;
+        this.messageSource = messageSource;
+    }
 
-
-    //TODO: test -> shouldCreateDefaultWheelOfLife()
     public WheelOfLife createDefaultWheelOfLife() {
         var locale = LocaleContextHolder.getLocale();
         var wheelOfLife = new WheelOfLife();
 
-        var lifeAreas = new ArrayList<>(List.of(
-                messageSource.getMessage("lifeArea.health", null, locale),
-                messageSource.getMessage("lifeArea.career", null, locale),
-                messageSource.getMessage("lifeArea.finances", null, locale),
-                messageSource.getMessage("lifeArea.personalDevelopment", null, locale),
-                messageSource.getMessage("lifeArea.fun", null, locale),
-                messageSource.getMessage("lifeArea.relationships", null, locale)
-        ));
+        var lifeAreas = new ArrayList<>(
+                List.of("health", "career", "finances", "personalDevelopment", "fun", "relationships")
+        );
 
         wheelOfLife.setLifeAreas(lifeAreas.stream()
                 .map(area -> {
                     var lifeArea = new LifeArea();
-                    lifeArea.setName(area);
+                    var language = List.of("pl", "en").contains(locale.getLanguage()) ? locale : Locale.forLanguageTag("pl");
+                    lifeArea.setName(messageSource.getMessage(("lifeArea." + area), null, language));
                     lifeArea.setRate((byte) 0);
                     lifeArea.setWheelOfLife(wheelOfLife);
 
@@ -47,12 +43,14 @@ public class WheelOfLifeService {
         return wheelOfLife;
     }
 
-    //TODO: test it!
-    public LifeArea addLifeArea(LifeArea lifeArea, WheelOfLife wheelOfLife) {
-        if (lifeArea != null) {
-            wheelOfLife.getLifeAreas().add(lifeArea);
-        }
+    public double calculateAverage(WheelOfLife wheelOfLife) {
+        if (wheelOfLife == null) return 0.0;
 
-        return wheelOfLife.getLifeAreas().contains(lifeArea) ?  lifeArea : null;
+        var rates = lifeAreaRepository.findAllRatesByWheelOfLifeId(wheelOfLife.getId());
+        if (rates.isEmpty()) return 0.0;
+
+        var average = rates.stream().mapToDouble(rate -> (double) rate).sum() / (double) rates.size();
+
+        return Math.round(average * 100.0) / 100.0;
     }
 }
