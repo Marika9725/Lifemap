@@ -11,9 +11,21 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
+#    show-sql: true
+#    properties:
+#      hibernate:
+#        format_sql: true
 
 server:
   servlet:
     session:
       timeout: 60m
+
+#logging:
+#  level:
+#    org:
+#      hibernate:
+#        type:
+#          descriptor:
+#            sql: TRACE
     

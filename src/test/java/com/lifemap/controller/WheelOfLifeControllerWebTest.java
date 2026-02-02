@@ -9,7 +9,6 @@ import org.junit.jupiter.api.*;
 import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.test.context.support.*;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -186,6 +185,88 @@ class WheelOfLifeControllerWebTest {
                     )
                     .andExpect(status().is3xxRedirection())
                     .andExpect(redirectedUrl("/dashboard/wheelOfLife"));
+        }
+    }
+
+    @Nested
+    class HttpDELETE_wheelOfLife {
+        @Test
+        @WithAnonymousUser
+        public void shouldNotDeleteLifeAreaWhenUserIsNotLogin() throws Exception {
+            mockMvc.perform(delete("/dashboard/wheelOfLife")
+                            .with(csrf())
+                            .param("action", "delete")
+                    )
+                    .andExpect(status().is3xxRedirection())
+                    .andExpect(redirectedUrl("http://localhost/login"));
+        }
+
+        @Test
+        @WithMockUser
+        public void shouldRedirectToLoginPageWhenPrincipalUserIsNotFoundInDatabase() throws Exception {
+            mockMvc.perform(post("/dashboard/wheelOfLife")
+                            .with(csrf())
+                            .param("action", "delete")
+                            .param("lifeAreaName", "finance")
+                    )
+                    .andExpect(status().is3xxRedirection())
+                    .andExpect(redirectedUrl("/logout"));
+        }
+
+        @Test
+        @WithMockUser
+        public void shouldReturnOldWheelOfLifePageWhenDeletingLifeAreaFails() throws Exception {
+            //given
+            User user = testUtils.createTestUser();
+            WheelOfLife wheelOfLife = testUtils.createTestWheelOfLife();
+            wheelOfLife.setUser(user);
+            user.setWheelOfLife(wheelOfLife);
+
+            var averageBefore = wheelOfLifeService.calculateAverage(wheelOfLife);
+            var lifeAreasNumBefore = wheelOfLife.getLifeAreas().size();
+
+            when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
+            when(lifeAreaService.removeLifeArea(
+                    anyString(),
+                    ArgumentMatchers.any(WheelOfLife.class)
+            )).thenReturn(false);
+
+            //when + then
+            mockMvc.perform(post("/dashboard/wheelOfLife")
+                            .with(csrf())
+                            .param("action", "delete")
+                            .param("lifeAreaName", "career")
+            )
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("dashboard_wheelOfLife"))
+                    .andExpect(model().attribute("areas", hasSize(lifeAreasNumBefore)))
+                    .andExpect(model().attribute("average", is(averageBefore)));
+        }
+
+        @Test
+        @WithMockUser
+        public void shouldRedirectToWheelOfLifePageWhenDeletingLifeAreaIsSuccessful() throws Exception {
+            //given
+            User user = testUtils.createTestUser();
+            WheelOfLife wheelOfLife = testUtils.createTestWheelOfLife();
+            wheelOfLife.setUser(user);
+            user.setWheelOfLife(wheelOfLife);
+
+            when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
+            when(lifeAreaService.removeLifeArea(
+                    anyString(),
+                    ArgumentMatchers.any(WheelOfLife.class)
+            )).thenReturn(true);
+
+            //when + then
+            mockMvc.perform(post("/dashboard/wheelOfLife")
+                            .with(csrf())
+                            .param("action", "delete")
+                            .param("lifeAreaName", "finance")
+                    )
+                    .andExpect(status().is3xxRedirection())
+                    .andExpect(redirectedUrl("/dashboard/wheelOfLife"))
+                    .andExpect(view().name("redirect:/dashboard/wheelOfLife"));
         }
     }
 }

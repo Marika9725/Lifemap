@@ -11,6 +11,8 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.function.Function;
+
 @Controller
 @RequestMapping("/dashboard/wheelOfLife")
 @AllArgsConstructor
@@ -21,49 +23,78 @@ public class WheelOfLifeController {
     private final WheelOfLifeService wheelOfLifeService;
 
     @GetMapping
-    public String showWheelOfLife(@AuthenticationPrincipal
-                                  User actualUser, Model model) {
-        var user = fetchCurrentUser(actualUser);
-        if (user == null) return "redirect:/logout";
+    public String showWheelOfLife(
+            @AuthenticationPrincipal
+            User actualUser, Model model) {
 
-        addAttributes(user.getWheelOfLife(), model);
-        model.addAttribute("newLifeArea", new LifeAreaDTO());
+        var wheelOfLife = getWheelOfLife(actualUser);
+        if (wheelOfLife == null) return "redirect:/logout";
+
+        addAttributes(wheelOfLife, model, new LifeAreaDTO());
 
         return "dashboard_wheelOfLife";
     }
 
     @PostMapping
-    public String addLifeArea(@AuthenticationPrincipal User actualUser,
-                              @ModelAttribute("newLifeArea") LifeAreaDTO toSave,
-                              BindingResult result,
-                              Model model
+    public String addLifeArea(
+            @AuthenticationPrincipal User actualUser,
+            @ModelAttribute("newLifeArea") LifeAreaDTO toSave,
+            BindingResult result,
+            Model model
     ) {
-        var user = fetchCurrentUser(actualUser);
-        if (user == null) return "redirect:/logout";
-        var wheelOfLife = user.getWheelOfLife();
+        return handleLifeAreaOperation(
+                actualUser,
+                model,
+                wheel -> lifeAreaService.addLifeArea(toSave, wheel, result),
+                toSave
+        );
+    }
 
-        var isLifeAreaAdded = lifeAreaService.addLifeArea(toSave, wheelOfLife, result);
+    @PostMapping(params = "action=delete")
+    public String deleteLifeArea(
+            @AuthenticationPrincipal User actualUser,
+            @RequestParam String lifeAreaName,
+            Model model
+    ) {
+        return handleLifeAreaOperation(
+                actualUser,
+                model,
+                wheel -> lifeAreaService.removeLifeArea(lifeAreaName, wheel),
+                new LifeAreaDTO()
+        );
+    }
 
-        if (result.hasErrors() || !isLifeAreaAdded) {
-            addAttributes(wheelOfLife, model);
-            model.addAttribute("newLifeArea", toSave);
+    private String handleLifeAreaOperation(
+            User actualUser,
+            Model model,
+            Function<WheelOfLife, Boolean> operation,
+            LifeAreaDTO lifeAreaDTO
+    ) {
+        var wheelOfLife = getWheelOfLife(actualUser);
+        if (wheelOfLife == null) return "redirect:/logout";
+
+        var success = operation.apply(wheelOfLife);
+        if (!success) {
+            addAttributes(wheelOfLife, model, lifeAreaDTO);
             return "dashboard_wheelOfLife";
         }
 
         return "redirect:/dashboard/wheelOfLife";
     }
 
-    private com.lifemap.model.User fetchCurrentUser(User actualUser) {
-        var optUser = userRepository.findByEmail(actualUser.getUsername());
+    private WheelOfLife getWheelOfLife(User actualUser) {
+        var user = userRepository.findByEmail(actualUser.getUsername()).orElse(null);
+        if (user == null) return null;
 
-        return optUser.orElse(null);
+        return user.getWheelOfLife();
     }
 
-    private void addAttributes(WheelOfLife wheelOfLife, Model model) {
+    private void addAttributes(WheelOfLife wheelOfLife, Model model, LifeAreaDTO lifeAreaDTO) {
         var wheelOfLifeDTO = new WheelOfLifeDTO(wheelOfLife);
 
         model.addAttribute("areas", wheelOfLifeDTO.getLifeAreas());
         //TODO: change calculateAverage() to variable in wheelOfLifeDTO and wheelOfLife entity ???
         model.addAttribute("average", wheelOfLifeService.calculateAverage(wheelOfLife));
+        model.addAttribute("newLifeArea", lifeAreaDTO);
     }
 }

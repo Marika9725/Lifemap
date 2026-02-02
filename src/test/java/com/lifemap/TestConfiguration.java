@@ -23,6 +23,4 @@ public class TestConfiguration {
 
         return result;
     }
-
-
 }

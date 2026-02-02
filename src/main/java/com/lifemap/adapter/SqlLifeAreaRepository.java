@@ -11,4 +11,7 @@ public interface SqlLifeAreaRepository extends LifeAreaRepository, JpaRepository
     @Query("SELECT l.rate FROM LifeArea l WHERE l.wheelOfLife.id = :wheelOfLifeId")
     List<Byte> findAllRatesByWheelOfLifeId(Long wheelOfLifeId);
     List<LifeArea> findAllByWheelOfLifeId(Long wheelOfLifeId);
+    @Modifying
+    @Query("DELETE FROM LifeArea l WHERE l.name = :name AND l.wheelOfLife.id = :wheelOfLifeId")
+    int deleteByNameAndWheelOfLifeId(String name, Long wheelOfLifeId);
 }

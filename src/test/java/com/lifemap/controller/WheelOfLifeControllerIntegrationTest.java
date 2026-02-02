@@ -3,7 +3,9 @@ package com.lifemap.controller;
 import com.lifemap.TestUtils;
 import com.lifemap.model.*;
 import com.lifemap.service.WheelOfLifeService;
+import org.hibernate.AssertionFailure;
 import org.junit.jupiter.api.*;
+import org.slf4j.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -39,67 +41,129 @@ public class WheelOfLifeControllerIntegrationTest {
     @Autowired
     private WheelOfLifeService wheelOfLifeService;
 
-    @Test
+    @Nested
     @WithMockUser(username = "user@example.com", roles = "USER")
-    public void shouldSuccessfullyAddNewLifeAreaToDatabase() throws Exception {
-        //given
-        var user = testUtils.createTestUser();
+    public class AddLifeAreaTests {
+        @Test
+        public void shouldSuccessfullyAddNewLifeAreaToDatabase() throws Exception {
+            //given
+            var user = testUtils.createTestUser();
 
-        var wheelOfLife = new WheelOfLife();
-        wheelOfLife.setUser(user);
-        user.setWheelOfLife(wheelOfLife);
+            var wheelOfLife = new WheelOfLife();
+            wheelOfLife.setUser(user);
+            user.setWheelOfLife(wheelOfLife);
 
-        userRepository.save(user);
+            userRepository.save(user);
 
-        //when + then
-        mockMvc.perform(post("/dashboard/wheelOfLife")
-                        .with(csrf())
-                        .param("name", "spirituality")
-                        .param("rate", "8")
-                )
-                .andExpect(status().is3xxRedirection())
-                .andExpect(redirectedUrl("/dashboard/wheelOfLife"));
+            //when + then
+            mockMvc.perform(post("/dashboard/wheelOfLife")
+                            .with(csrf())
+                            .param("name", "spirituality")
+                            .param("rate", "8")
+                    )
+                    .andExpect(status().is3xxRedirection())
+                    .andExpect(redirectedUrl("/dashboard/wheelOfLife"));
 
-        var savedUser = userRepository.findByEmail(user.getEmail())
-                .orElseThrow(() -> new AssertionError("User not saved"));
-        var wheelOfLifeId = savedUser.getWheelOfLife().getId();
-        var lifeAreas = lifeAreaRepository.findAllByWheelOfLifeId(wheelOfLifeId);
+            var savedUser = userRepository.findByEmail(user.getEmail())
+                    .orElseThrow(() -> new AssertionError("User not saved"));
+            var wheelOfLifeId = savedUser.getWheelOfLife().getId();
+            var lifeAreas = lifeAreaRepository.findAllByWheelOfLifeId(wheelOfLifeId);
 
-        assertNotNull(lifeAreas);
-        assertTrue(lifeAreas.stream()
-                .anyMatch(lifeArea -> lifeArea.getName().equalsIgnoreCase("spirituality")
-                        && lifeArea.getRate() == (byte) 8)
-        );
+            assertNotNull(lifeAreas);
+            assertTrue(lifeAreas.stream()
+                    .anyMatch(lifeArea -> lifeArea.getName().equalsIgnoreCase("spirituality")
+                            && lifeArea.getRate() == (byte) 8)
+            );
+        }
+
+        @Test
+        public void shouldNotAddNewLifeAreaToDatabaseWhenGivenDataIsInvalid() throws Exception {
+            //given
+            var user = testUtils.createTestUser();
+
+            var wheelOfLife = new WheelOfLife();
+            wheelOfLife.setUser(user);
+            user.setWheelOfLife(wheelOfLife);
+
+            userRepository.save(user);
+
+            //when + then
+            mockMvc.perform(post("/dashboard/wheelOfLife")
+                            .with(csrf())
+                            .param("name", "")
+                            .param("rate", "8")
+                    )
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("dashboard_wheelOfLife"));
+
+            var savedUser = userRepository.findByEmail("user@example.com")
+                    .orElseThrow(() -> new AssertionError("User not found"));
+
+            var wheelOfLifeId = savedUser.getWheelOfLife().getId();
+            var lifeAreas = lifeAreaRepository.findAllByWheelOfLifeId(wheelOfLifeId);
+
+            assertNotNull(lifeAreas);
+            assertThat(lifeAreas.size(), is(0));
+        }
     }
 
-    @Test
+    @Nested
     @WithMockUser(username = "user@example.com", roles = "USER")
-    public void shouldNotAddNewLifeAreaToDatabaseWhenGivenDataIsInvalid() throws Exception {
-        //given
-        var user = testUtils.createTestUser();
+    public class DeleteLifeAreaTests {
+        @Test
+        public void shouldSuccessfullyRemoveLifeAreaFromDatabase() throws Exception {
+            //given
+            var user = testUtils.createTestUser();
+            var wheelOfLife = testUtils.createTestWheelOfLife();
+            wheelOfLife.setUser(user);
+            user.setWheelOfLife(wheelOfLife);
 
-        var wheelOfLife = new WheelOfLife();
-        wheelOfLife.setUser(user);
-        user.setWheelOfLife(wheelOfLife);
+            userRepository.save(user);
 
-        userRepository.save(user);
+            //when+then
+            mockMvc.perform(post("/dashboard/wheelOfLife")
+                            .with(csrf())
+                            .param("lifeAreaName", "health")
+                            .param("action", "delete")
+                    )
+                    .andExpect(status().is3xxRedirection())
+                    .andExpect(redirectedUrl("/dashboard/wheelOfLife"));
 
-        //when + then
-        mockMvc.perform(post("/dashboard/wheelOfLife")
-                        .with(csrf())
-                        .param("name", "")
-                        .param("rate", "8")
-                )
-                .andExpect(status().isOk())
-                .andExpect(view().name("dashboard_wheelOfLife"));
+            var savedUser = userRepository.findByEmail(user.getEmail()).orElseThrow(() -> new AssertionFailure("User not saved"));
+            var wheelOfLifeId = savedUser.getWheelOfLife().getId();
+            var lifeAreas = lifeAreaRepository.findAllByWheelOfLifeId(wheelOfLifeId);
 
-        var savedUser = userRepository.findByEmail("user@example.com")
-                .orElseThrow(() -> new AssertionError("User not found"));
+            assertNotNull(lifeAreas);
+            assertTrue(lifeAreas.stream().noneMatch(lifeArea -> lifeArea.getName().equalsIgnoreCase("health")));
+        }
 
-        var wheelOfLifeId = savedUser.getWheelOfLife().getId();
-        var lifeAreas = lifeAreaRepository.findAllByWheelOfLifeId(wheelOfLifeId);
+        @Test
+        public void shouldNotRemoveLifeAreaWhenGivenDataIsInvalid() throws Exception {
+            //given
+            var user = testUtils.createTestUser();
+            var wheelOfLife = testUtils.createTestWheelOfLife();
+            wheelOfLife.setUser(user);
+            user.setWheelOfLife(wheelOfLife);
 
-        assertNotNull(lifeAreas);
-        assertThat(lifeAreas.size(), is(0));
+            userRepository.save(user);
+            var lifeAreaSizeBefore = wheelOfLife.getLifeAreas().size();
+
+            //when+then
+            mockMvc.perform(post("/dashboard/wheelOfLife")
+                            .with(csrf())
+                            .param("lifeAreaName", "")
+                            .param("action", "delete")
+                    )
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("dashboard_wheelOfLife"));
+
+            var savedUser = userRepository.findByEmail(user.getEmail()).orElseThrow(() -> new AssertionFailure("User not saved"));
+            var wheelOfLifeId = savedUser.getWheelOfLife().getId();
+            var lifeAreas = lifeAreaRepository.findAllByWheelOfLifeId(wheelOfLifeId);
+
+            assertNotNull(lifeAreas);
+            assertThat(lifeAreas.size(), is(lifeAreaSizeBefore));
+
+        }
     }
 }

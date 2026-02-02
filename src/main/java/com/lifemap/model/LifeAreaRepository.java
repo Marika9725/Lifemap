@@ -1,7 +1,5 @@
 package com.lifemap.model;
 
-import org.springframework.data.jpa.repository.Query;
-
 import java.util.*;
 
 public interface LifeAreaRepository {
@@ -10,4 +8,5 @@ public interface LifeAreaRepository {
 //    Optional<LifeArea> findByNameAndWheelOfLifeId(String name, Long wheelOfLifeId);
     List<Byte> findAllRatesByWheelOfLifeId(Long wheelOfLifeId);
     List<LifeArea> findAllByWheelOfLifeId(Long wheelOfLifeId);
+    int deleteByNameAndWheelOfLifeId(String name, Long wheelOfLifeId);
 }

@@ -44,11 +44,16 @@
                                     <p th:text="|${area.rate} / 10|"></p>
                                 </td>
                                 <td>
-                                    <button type="submit" th:title="#{html.wheelOfLifePage.increaseRating}">+</button>
-                                    <button type="submit" th:title="#{html.wheelOfLifePage.decreaseRating}">-</button>
-                                    <button type="submit" class="removeBtn" th:title="#{html.wheelOfLifePage.button.removeArea}">
-                                        <img th:src="@{/images/remove.png}" alt="removeArea"/>
-                                    </button>
+                                    <div class="button-row">
+                                        <button type="submit" th:title="#{html.wheelOfLifePage.increaseRating}">+</button>
+                                        <button type="submit" th:title="#{html.wheelOfLifePage.decreaseRating}">-</button>
+                                        <form class="btn" method="post" th:action="@{/dashboard/wheelOfLife}">
+                                            <input type="hidden" name="lifeAreaName" th:value="${area.name}"/>
+                                            <button type="submit" name="action" value="delete" class="removeBtn" th:title="#{html.wheelOfLifePage.button.removeArea}">
+                                                <img th:src="@{/images/remove.png}" alt="removeArea"/>
+                                            </button>
+                                        </form>
+                                    </div>
                                 </td>
                             </tr>
                         </table>

@@ -203,6 +203,16 @@ button.removeBtn img {
     display: block;
 }
 
+div .button-row {
+    display: flex;
+}
+
+form .btn {
+    display: inline-block;
+    height: 25px;
+    width: 25px;
+}
+
 a {
     text-decoration: none;
     color: darkgoldenrod;
