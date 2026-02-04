@@ -1,8 +1,7 @@
 package com.lifemap.service;
 
 import com.lifemap.model.*;
-import com.lifemap.model.projection.LifeAreaDTO;
-import org.slf4j.*;
+import com.lifemap.model.projection.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
@@ -17,7 +16,7 @@ public class LifeAreaService {
     }
 
     @Transactional
-    public boolean addLifeArea(LifeAreaDTO toSave, WheelOfLife wheelOfLife, BindingResult result) {
+    public boolean addLifeArea(LifeAreaCreateDTO toSave, WheelOfLife wheelOfLife, BindingResult result) {
         if (toSave == null || wheelOfLife == null || result == null) return false;
 
         checkLifeAreaData(toSave, wheelOfLife, result);
@@ -34,14 +33,13 @@ public class LifeAreaService {
     }
 
     @Transactional
-    public boolean removeLifeArea(String lifeAreaName, WheelOfLife wheelOfLife) {
-        if (lifeAreaName == null || lifeAreaName.isBlank()) return false;
-        if (wheelOfLife == null || wheelOfLife.getId() < 0) return false;
+    public boolean removeLifeArea(Long lifeAreaId) {
+        if (lifeAreaId == null || lifeAreaId < 0) return false;
 
-        return wheelOfLife.getLifeAreas().removeIf(la -> la.getName().equalsIgnoreCase(lifeAreaName));
+        return lifeAreaRepository.deleteByIdReturningCount(lifeAreaId) == 1;
     }
 
-    private void checkLifeAreaData(LifeAreaDTO toSave, WheelOfLife wheelOfLife, BindingResult result) {
+    private void checkLifeAreaData(LifeAreaCreateDTO toSave, WheelOfLife wheelOfLife, BindingResult result) {
         if (toSave.getName() == null || toSave.getName().isBlank()) {
             result.rejectValue("name", "lifeArea.invalid.name");
         }
@@ -51,7 +49,7 @@ public class LifeAreaService {
         }
     }
 
-    private LifeArea createNewLifeArea(LifeAreaDTO toSave, WheelOfLife wheelOfLife) {
+    private LifeArea createNewLifeArea(LifeAreaCreateDTO toSave, WheelOfLife wheelOfLife) {
         var lifeArea = toSave.toLifeArea();
 
         if (lifeArea == null) return null;

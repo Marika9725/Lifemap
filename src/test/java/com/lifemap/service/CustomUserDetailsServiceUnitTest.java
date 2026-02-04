@@ -1,6 +1,6 @@
 package com.lifemap.service;
 
-import com.lifemap.model.*;
+import com.lifemap.TestUtils;import com.lifemap.model.*;
 import com.lifemap.model.User;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -25,16 +25,15 @@ class CustomUserDetailsServiceUnitTest {
     @InjectMocks
     private CustomUserDetailsService service;
 
+    private TestUtils testUtils = new TestUtils();
+
     @Nested
     class LoadUserByUsernameTests {
         @Test
         public void shouldReturnSecurityUserWhenUsernameExists() {
             //given
             var username = "TestUser";
-            var user = new User();
-            user.setEmail("user@example.com");
-            user.setPassword("encodedPassword");
-            user.setRole(Role.ROLE_USER);
+            var user = testUtils.createTestUser();
 
             when(repo.findByEmail(username)).thenReturn(Optional.of(user));
 

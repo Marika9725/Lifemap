@@ -130,7 +130,7 @@ class UserServiceUnitTest {
         when(repo.existsByUsername(anyString())).thenReturn(false);
         when(encoder.encode(anyString())).thenAnswer(invocation -> invocation.getArgument(0));
 
-        var wheelOfLife = testUtils.createTestWheelOfLife();
+        var wheelOfLife = testUtils.createTestWheelOfLifeWithAreas();
         when(wheelOfLifeService.createDefaultWheelOfLife()).thenReturn(wheelOfLife);
 
         ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);

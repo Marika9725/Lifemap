@@ -2,6 +2,7 @@ package com.lifemap.service;
 
 import com.lifemap.TestUtils;
 import com.lifemap.model.*;
+import com.lifemap.model.projection.*;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -12,17 +13,17 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 
 import java.util.*;
-import java.util.stream.Collectors;
+import java.util.stream.*;
 
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.hasItems;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
+import static org.hamcrest.Matchers.is;
 
 @ExtendWith(MockitoExtension.class)
 public class WheelOfLifeServiceUnitTest {
-
-    private final TestUtils testUtils = new TestUtils();
 
     @Mock
     public LifeAreaRepository lifeAreaRepository;
@@ -41,7 +42,7 @@ public class WheelOfLifeServiceUnitTest {
             //given
             LocaleContextHolder.setLocale(Locale.forLanguageTag(language));
 
-            when(messageSource.getMessage(anyString(), any(), ArgumentMatchers.any(Locale.class)))
+            when(messageSource.getMessage(anyString(), any(), any(Locale.class)))
                     .thenAnswer(invocation -> {
                         String code = invocation.getArgument(0);
                         Locale locale = invocation.getArgument(2);
@@ -73,7 +74,7 @@ public class WheelOfLifeServiceUnitTest {
             //given
             LocaleContextHolder.setLocale(Locale.forLanguageTag("de"));
 
-            when(messageSource.getMessage(anyString(), any(), ArgumentMatchers.any(Locale.class)))
+            when(messageSource.getMessage(anyString(), any(), any(Locale.class)))
                     .thenAnswer(invocation -> {
                         String code = invocation.getArgument(0);
                         Locale locale = invocation.getArgument(2);
@@ -111,13 +112,11 @@ public class WheelOfLifeServiceUnitTest {
         @Test
         public void shouldReturnZeroWhenThereAreNoLifeAreasInGivenWheelOfLife() {
             //given
-            var wheelOfLife = new WheelOfLife();
-            wheelOfLife.setId(1L);
-
-            when(lifeAreaRepository.findAllRatesByWheelOfLifeId(1L)).thenReturn(Collections.emptyList());
+            var wheelOfLife = TestUtils.createTestWheelOfLife();
+            var wheelOfLifeReadDTO = new WheelOfLifeReadDTO(wheelOfLife);
 
             //when
-            var result = wheelOfLifeService.calculateAverage(wheelOfLife);
+            var result = wheelOfLifeService.calculateAverage(wheelOfLifeReadDTO.getLifeAreas());
 
             //then
             assertThat(result, is(0.0));
@@ -126,16 +125,15 @@ public class WheelOfLifeServiceUnitTest {
         @Test
         public void shouldReturnCorrectAverage() {
             //given
-            var wheelOfLife = testUtils.createTestWheelOfLife();
-            wheelOfLife.setId(1L);
-            var lifeAreas = wheelOfLife.getLifeAreas();
-            var listOfRates = lifeAreas.stream().map(LifeArea::getRate).toList();
-            var expected = (double) lifeAreas.stream().mapToInt(LifeArea::getRate).sum() / (double) lifeAreas.size();
-
-            when(lifeAreaRepository.findAllRatesByWheelOfLifeId(anyLong())).thenReturn(listOfRates);
+            var lifeAreaDTO1 = new LifeAreaReadDTO(TestUtils.createTestLifeArea());
+            var lifeAreaDTO2 = new LifeAreaReadDTO(TestUtils.createTestLifeArea(2L, "testLifeArea", (byte) 4));
+            var lifeAreaDTO3 = new LifeAreaReadDTO(TestUtils.createTestLifeArea(3L, "testLifeArea", (byte) 3));
+            var lifeAreas = List.of(lifeAreaDTO1, lifeAreaDTO2, lifeAreaDTO3);
+            var sumRates = lifeAreas.stream().mapToDouble(LifeAreaReadDTO::getRate).sum();
+            var expected = sumRates / (double) lifeAreas.size();
 
             //when
-            var actual = wheelOfLifeService.calculateAverage(wheelOfLife);
+            var actual = wheelOfLifeService.calculateAverage(lifeAreas);
 
             //then
             assertThat(actual, is(expected));

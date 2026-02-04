@@ -1,8 +1,7 @@
 package com.lifemap.service;
 
 import com.lifemap.model.*;
-import com.lifemap.model.projection.LifeAreaDTO;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.lifemap.model.projection.*;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Service;
@@ -43,13 +42,10 @@ public class WheelOfLifeService {
         return wheelOfLife;
     }
 
-    public double calculateAverage(WheelOfLife wheelOfLife) {
-        if (wheelOfLife == null) return 0.0;
+    public double calculateAverage(List<LifeAreaReadDTO> lifeAreas) {
+        if (lifeAreas == null) return 0.0;
 
-        var rates = lifeAreaRepository.findAllRatesByWheelOfLifeId(wheelOfLife.getId());
-        if (rates.isEmpty()) return 0.0;
-
-        var average = rates.stream().mapToDouble(rate -> (double) rate).sum() / (double) rates.size();
+        var average = lifeAreas.stream().mapToDouble(LifeAreaReadDTO::getRate).sum() / (double) lifeAreas.size();
 
         return Math.round(average * 100.0) / 100.0;
     }

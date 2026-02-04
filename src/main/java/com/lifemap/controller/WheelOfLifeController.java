@@ -24,13 +24,13 @@ public class WheelOfLifeController {
 
     @GetMapping
     public String showWheelOfLife(
-            @AuthenticationPrincipal
-            User actualUser, Model model) {
-
+            @AuthenticationPrincipal User actualUser,
+            Model model
+    ) {
         var wheelOfLife = getWheelOfLife(actualUser);
         if (wheelOfLife == null) return "redirect:/logout";
 
-        addAttributes(wheelOfLife, model, new LifeAreaDTO());
+        addAttributes(wheelOfLife, model, new LifeAreaCreateDTO());
 
         return "dashboard_wheelOfLife";
     }
@@ -38,7 +38,7 @@ public class WheelOfLifeController {
     @PostMapping
     public String addLifeArea(
             @AuthenticationPrincipal User actualUser,
-            @ModelAttribute("newLifeArea") LifeAreaDTO toSave,
+            @ModelAttribute("newLifeArea") LifeAreaCreateDTO toSave,
             BindingResult result,
             Model model
     ) {
@@ -53,14 +53,15 @@ public class WheelOfLifeController {
     @PostMapping(params = "action=delete")
     public String deleteLifeArea(
             @AuthenticationPrincipal User actualUser,
-            @RequestParam String lifeAreaName,
+            @RequestParam Long lifeAreaId,
             Model model
     ) {
+
         return handleLifeAreaOperation(
                 actualUser,
                 model,
-                wheel -> lifeAreaService.removeLifeArea(lifeAreaName, wheel),
-                new LifeAreaDTO()
+                wheel -> lifeAreaService.removeLifeArea(lifeAreaId),
+                new LifeAreaCreateDTO()
         );
     }
 
@@ -68,14 +69,14 @@ public class WheelOfLifeController {
             User actualUser,
             Model model,
             Function<WheelOfLife, Boolean> operation,
-            LifeAreaDTO lifeAreaDTO
+            LifeAreaCreateDTO lifeAreaCreateDTO
     ) {
         var wheelOfLife = getWheelOfLife(actualUser);
         if (wheelOfLife == null) return "redirect:/logout";
 
         var success = operation.apply(wheelOfLife);
         if (!success) {
-            addAttributes(wheelOfLife, model, lifeAreaDTO);
+            addAttributes(wheelOfLife, model, lifeAreaCreateDTO);
             return "dashboard_wheelOfLife";
         }
 
@@ -89,12 +90,12 @@ public class WheelOfLifeController {
         return user.getWheelOfLife();
     }
 
-    private void addAttributes(WheelOfLife wheelOfLife, Model model, LifeAreaDTO lifeAreaDTO) {
-        var wheelOfLifeDTO = new WheelOfLifeDTO(wheelOfLife);
+    private void addAttributes(WheelOfLife wheelOfLife, Model model, LifeAreaCreateDTO lifeAreaCreateDTO) {
+        var wheelOfLifeDTO = new WheelOfLifeReadDTO(wheelOfLife);
 
         model.addAttribute("areas", wheelOfLifeDTO.getLifeAreas());
         //TODO: change calculateAverage() to variable in wheelOfLifeDTO and wheelOfLife entity ???
-        model.addAttribute("average", wheelOfLifeService.calculateAverage(wheelOfLife));
-        model.addAttribute("newLifeArea", lifeAreaDTO);
+        model.addAttribute("average", wheelOfLifeService.calculateAverage(wheelOfLifeDTO.getLifeAreas()));
+        model.addAttribute("newLifeArea", lifeAreaCreateDTO);
     }
 }

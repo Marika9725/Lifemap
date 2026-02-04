@@ -33,7 +33,6 @@
                 </div>
                 <div class="rightPart">
                     <h2 th:text="#{html.wheelOfLifePage.header}">Obszary życia</h2>
-
                     <div class="scrollable-table">
                         <table>
                             <tr th:each="area : ${areas}">
@@ -48,7 +47,7 @@
                                         <button type="submit" th:title="#{html.wheelOfLifePage.increaseRating}">+</button>
                                         <button type="submit" th:title="#{html.wheelOfLifePage.decreaseRating}">-</button>
                                         <form class="btn" method="post" th:action="@{/dashboard/wheelOfLife}">
-                                            <input type="hidden" name="lifeAreaName" th:value="${area.name}"/>
+                                            <input type="hidden" name="lifeAreaId" th:value="${area.id}"/>
                                             <button type="submit" name="action" value="delete" class="removeBtn" th:title="#{html.wheelOfLifePage.button.removeArea}">
                                                 <img th:src="@{/images/remove.png}" alt="removeArea"/>
                                             </button>
@@ -58,8 +57,7 @@
                             </tr>
                         </table>
                     </div>
-
-<!--                    <div class="spacer"></div>-->
+                    <!--                    <div class="spacer"></div>-->
 
                     <div class="addLifeArea">
                         <p>

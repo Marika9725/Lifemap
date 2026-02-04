@@ -3,7 +3,7 @@ package com.lifemap.controller;
 import com.lifemap.TestUtils;
 import com.lifemap.config.SecurityConfig;
 import com.lifemap.model.*;
-import com.lifemap.model.projection.LifeAreaDTO;
+import com.lifemap.model.projection.*;
 import com.lifemap.service.*;
 import org.junit.jupiter.api.*;
 import org.mockito.ArgumentMatchers;
@@ -18,7 +18,7 @@ import org.springframework.validation.BindingResult;
 import java.util.*;
 
 import static org.hamcrest.Matchers.*;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -27,7 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @WebMvcTest(WheelOfLifeController.class)
 @Import(SecurityConfig.class)
 class WheelOfLifeControllerWebTest {
-    @Autowired
+   @Autowired
     private MockMvc mockMvc;
 
     @MockitoBean
@@ -69,10 +69,10 @@ class WheelOfLifeControllerWebTest {
                     .andExpect(model().attribute("average", instanceOf(Double.class)))
                     .andExpect(model().attribute("areas", allOf(
                             instanceOf(List.class),
-                            everyItem(instanceOf(LifeAreaDTO.class))
+                            everyItem(instanceOf(LifeAreaReadDTO.class))
                     )))
                     .andExpect(model().attribute("newLifeArea", allOf(
-                            instanceOf(LifeAreaDTO.class),
+                            instanceOf(LifeAreaCreateDTO.class),
                             hasProperty("name", nullValue()),
                             hasProperty("rate", is((byte) 0))
                     )));
@@ -115,7 +115,7 @@ class WheelOfLifeControllerWebTest {
 
             when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
             when(lifeAreaService.addLifeArea(
-                    ArgumentMatchers.any(LifeAreaDTO.class),
+                    ArgumentMatchers.any(LifeAreaCreateDTO.class),
                     ArgumentMatchers.any(WheelOfLife.class),
                     ArgumentMatchers.any(BindingResult.class))
             ).thenReturn(false);
@@ -129,7 +129,7 @@ class WheelOfLifeControllerWebTest {
                     .andExpect(status().isOk())
                     .andExpect(view().name("dashboard_wheelOfLife"))
                     .andExpect(model().attribute("newLifeArea", allOf(
-                            instanceOf(LifeAreaDTO.class),
+                            instanceOf(LifeAreaCreateDTO.class),
                             hasProperty("name", is("Zdrowie")),
                             hasProperty("rate", is((byte) 8))
                     )));
@@ -143,7 +143,7 @@ class WheelOfLifeControllerWebTest {
 
             when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
             when(lifeAreaService.addLifeArea(
-                    ArgumentMatchers.any(LifeAreaDTO.class),
+                    ArgumentMatchers.any(LifeAreaCreateDTO.class),
                     ArgumentMatchers.any(WheelOfLife.class),
                     ArgumentMatchers.any(BindingResult.class)
             )).thenReturn(false);
@@ -160,7 +160,7 @@ class WheelOfLifeControllerWebTest {
                     .andExpect(model().attribute("average", instanceOf(Double.class)))
                     .andExpect(model().attribute("areas", allOf(
                             instanceOf(List.class),
-                            everyItem(instanceOf(LifeAreaDTO.class))
+                            everyItem(instanceOf(LifeAreaReadDTO.class))
                     )));
         }
 
@@ -172,7 +172,7 @@ class WheelOfLifeControllerWebTest {
 
             when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
             when(lifeAreaService.addLifeArea(
-                    ArgumentMatchers.any(LifeAreaDTO.class),
+                    ArgumentMatchers.any(LifeAreaCreateDTO.class),
                     ArgumentMatchers.any(WheelOfLife.class),
                     ArgumentMatchers.any(BindingResult.class))
             ).thenReturn(true);
@@ -207,7 +207,7 @@ class WheelOfLifeControllerWebTest {
             mockMvc.perform(post("/dashboard/wheelOfLife")
                             .with(csrf())
                             .param("action", "delete")
-                            .param("lifeAreaName", "finance")
+                            .param("lifeAreaId", "1")
                     )
                     .andExpect(status().is3xxRedirection())
                     .andExpect(redirectedUrl("/logout"));
@@ -217,25 +217,21 @@ class WheelOfLifeControllerWebTest {
         @WithMockUser
         public void shouldReturnOldWheelOfLifePageWhenDeletingLifeAreaFails() throws Exception {
             //given
-            User user = testUtils.createTestUser();
-            WheelOfLife wheelOfLife = testUtils.createTestWheelOfLife();
-            wheelOfLife.setUser(user);
-            user.setWheelOfLife(wheelOfLife);
+            var user = testUtils.createTestUserWithWheelOfLifeAndLifeAreas();
+            var wheelOfLife = user.getWheelOfLife();
+            var wheelOfLifeReadDTO = new WheelOfLifeReadDTO(wheelOfLife);
 
-            var averageBefore = wheelOfLifeService.calculateAverage(wheelOfLife);
+            var averageBefore = wheelOfLifeService.calculateAverage(wheelOfLifeReadDTO.getLifeAreas());
             var lifeAreasNumBefore = wheelOfLife.getLifeAreas().size();
 
             when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
-            when(lifeAreaService.removeLifeArea(
-                    anyString(),
-                    ArgumentMatchers.any(WheelOfLife.class)
-            )).thenReturn(false);
+            when(lifeAreaService.removeLifeArea(anyLong())).thenReturn(false);
 
             //when + then
             mockMvc.perform(post("/dashboard/wheelOfLife")
                             .with(csrf())
                             .param("action", "delete")
-                            .param("lifeAreaName", "career")
+                            .param("lifeAreaId", "4")
             )
                     .andExpect(status().isOk())
                     .andExpect(view().name("dashboard_wheelOfLife"))
@@ -247,22 +243,16 @@ class WheelOfLifeControllerWebTest {
         @WithMockUser
         public void shouldRedirectToWheelOfLifePageWhenDeletingLifeAreaIsSuccessful() throws Exception {
             //given
-            User user = testUtils.createTestUser();
-            WheelOfLife wheelOfLife = testUtils.createTestWheelOfLife();
-            wheelOfLife.setUser(user);
-            user.setWheelOfLife(wheelOfLife);
+            var user = testUtils.createTestUserWithWheelOfLifeAndLifeAreas();
 
             when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
-            when(lifeAreaService.removeLifeArea(
-                    anyString(),
-                    ArgumentMatchers.any(WheelOfLife.class)
-            )).thenReturn(true);
+            when(lifeAreaService.removeLifeArea(anyLong())).thenReturn(true);
 
             //when + then
             mockMvc.perform(post("/dashboard/wheelOfLife")
                             .with(csrf())
                             .param("action", "delete")
-                            .param("lifeAreaName", "finance")
+                            .param("lifeAreaId", "1")
                     )
                     .andExpect(status().is3xxRedirection())
                     .andExpect(redirectedUrl("/dashboard/wheelOfLife"))

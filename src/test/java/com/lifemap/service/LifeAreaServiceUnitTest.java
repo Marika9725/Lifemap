@@ -2,7 +2,7 @@ package com.lifemap.service;
 
 import com.lifemap.TestUtils;
 import com.lifemap.model.*;
-import com.lifemap.model.projection.LifeAreaDTO;
+import com.lifemap.model.projection.*;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -12,12 +12,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.validation.BeanPropertyBindingResult;
 
 import java.util.*;
-import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -41,8 +39,8 @@ public class LifeAreaServiceUnitTest {
         @Test
         public void shouldNotAddLifeAreaWhenLifeAreaNameIsDuplicated() {
             //given
-            var lifeAreaDTO = createTestLifeAreaDTO("health");
-            var wheelOfLife = testUtils.createTestWheelOfLife();
+            var lifeAreaDTO = testUtils.createTestLifeAreaCreateDTO("health");
+            var wheelOfLife = testUtils.createTestWheelOfLifeWithAreas();
             var sizeBefore = wheelOfLife.getLifeAreas().size();
 
             var bindingResult = new BeanPropertyBindingResult(lifeAreaDTO, "lifeAreaDTO");
@@ -60,8 +58,8 @@ public class LifeAreaServiceUnitTest {
         @Test
         public void shouldNotAddLifeAreaWhenLifeAreaNameIsInvalid() {
             //given
-            var lifeAreaDTO = createTestLifeAreaDTO(null);
-            var wheelOfLife = createTestWheelOfLife();
+            var lifeAreaDTO = testUtils.createTestLifeAreaCreateDTO(null);
+            var wheelOfLife = TestUtils.createTestWheelOfLife();
             var sizeBefore = wheelOfLife.getLifeAreas().size();
             var bindingResult = new BeanPropertyBindingResult(lifeAreaDTO, "lifeAreaDTO");
 
@@ -75,11 +73,11 @@ public class LifeAreaServiceUnitTest {
             assertThat(sizeAfter, is(sizeBefore));
         }
 
-        @Test
+       @Test
         public void shouldReturnTrueWhenLifeAreaIsSuccessfullySaved() {
             //given
-            var lifeAreaDTO = createTestLifeAreaDTO("health");
-            var wheelOfLife = createTestWheelOfLife();
+            var lifeAreaDTO = testUtils.createTestLifeAreaCreateDTO("health");
+            var wheelOfLife = TestUtils.createTestWheelOfLife();
             var sizeBefore = wheelOfLife.getLifeAreas().size();
 
             var bindingResult = new BeanPropertyBindingResult(lifeAreaDTO, "lifeAreaDTO");
@@ -100,73 +98,45 @@ public class LifeAreaServiceUnitTest {
             assertThat(sizeAfter, is(++sizeBefore));
             assertTrue(wheelOfLife.getLifeAreas().stream().anyMatch(area -> area.getName().equals(lifeAreaDTO.getName())));
         }
-
     }
 
-    @Nested
+   @Nested
     public class DeleteLifeAreaTests {
         @ParameterizedTest
-        @MethodSource("provideLifeAreas")
-        public void shouldReturnFalseWhenArgumentsAreInvalid(String lifeAreaName, WheelOfLife wheelOfLife) {
-            lifeAreaService.removeLifeArea(lifeAreaName, wheelOfLife);
+        @NullSource
+        @ValueSource(longs = -1)
+        public void shouldReturnFalseWhenArgumentsAreInvalid(Long lifeAreaId) {
+            assertFalse(lifeAreaService.removeLifeArea(lifeAreaId));
+            verify(lifeAreaRepository, never()).deleteByIdReturningCount(anyLong());
         }
 
         @Test
-        public void shouldReturnFalseWhenNameOfLifeNotExists() {
+        public void shouldReturnFalseWhenLifeAreaIdNotExists() {
             //given
-            var wheelOfLife = testUtils.createTestWheelOfLife();
-            wheelOfLife.setId(1L);
+            var wheelOfLife = testUtils.createTestWheelOfLifeWithAreas();
             var sizeBefore = wheelOfLife.getLifeAreas().size();
 
             //when
-            var result = lifeAreaService.removeLifeArea("career", wheelOfLife);
+            var result = lifeAreaService.removeLifeArea(4L);
             var sizeAfter = wheelOfLife.getLifeAreas().size();
 
             //then
             assertFalse(result);
             assertThat(sizeAfter, is(sizeBefore));
+            verify(lifeAreaRepository, times(1)).deleteByIdReturningCount(anyLong());
         }
 
         @Test
         public void shouldReturnTrueWhenLifeAreaIsSuccessfullyRemoved() {
             //given
-            var wheelOfLife = testUtils.createTestWheelOfLife();
-            wheelOfLife.setId(1L);
-            var sizeBefore = wheelOfLife.getLifeAreas().size();
+            when(lifeAreaRepository.deleteByIdReturningCount(1L)).thenReturn(1);
 
             //when
-            var result = lifeAreaService.removeLifeArea("health", wheelOfLife);
-            var sizeAfter = wheelOfLife.getLifeAreas().size();
+            var result = lifeAreaService.removeLifeArea(1L);
 
             //then
             assertTrue(result);
-            assertThat(sizeAfter, is((sizeBefore - 1)));
+            verify(lifeAreaRepository, times(1)).deleteByIdReturningCount(1L);
         }
-
-        static Stream<Arguments> provideLifeAreas() {
-            WheelOfLife wheelOfLife = new WheelOfLife();
-            wheelOfLife.setId(1L);
-
-            return Stream.of(
-                    Arguments.of(null, wheelOfLife),
-                    Arguments.of("health", null),
-                    Arguments.of(null, null),
-                    Arguments.of(null, new WheelOfLife())
-            );
-        }
-    }
-
-    private static WheelOfLife createTestWheelOfLife() {
-        var wheelOfLife = new WheelOfLife();
-        wheelOfLife.setLifeAreas(new HashSet<>());
-        wheelOfLife.setId(1L);
-        return wheelOfLife;
-    }
-
-    private static LifeAreaDTO createTestLifeAreaDTO(String name) {
-        var lifeAreaDTO = new LifeAreaDTO();
-        lifeAreaDTO.setName(name);
-        lifeAreaDTO.setRate((byte) 8);
-        return lifeAreaDTO;
     }
 }

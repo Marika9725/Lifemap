@@ -1,53 +1,99 @@
 package com.lifemap;
 
 import com.lifemap.model.*;
-import com.lifemap.model.projection.LifeAreaDTO;
+import com.lifemap.model.projection.LifeAreaCreateDTO;
 
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.*;
 
 public class TestUtils {
 
-    public User createTestUser() {
-        var user = new User();
-        user.setUsername("TestUser");
-        user.setEmail("user@example.com");
-        user.setPassword("#Password123");
-        user.setRole(Role.ROLE_USER);
 
-        return user;
-    }
+    //region TestUser
+        public User createTestUser() {
+            var user = new User();
+            user.setUsername("TestUser");
+            user.setEmail("user@example.com");
+            user.setPassword("#Password123");
+            user.setRole(Role.ROLE_USER);
 
-    public User createTestUserWithWheelOfLifeAndLifeAreas() {
-        var user = createTestUser();
+            return user;
+        }
 
-        var wheelOfLife = new WheelOfLife();
-        wheelOfLife.setLifeAreas(Set.of(new LifeArea()));
-        user.setWheelOfLife(wheelOfLife);
+        public User createTestUserWithWheelOfLifeAndLifeAreas() {
+            var user = createTestUser();
+            var wheelOfLife = createTestWheelOfLifeWithAreas();
 
-        return user;
-    }
+            user.setWheelOfLife(wheelOfLife);
+            wheelOfLife.setUser(user);
 
-    public LifeArea createTestLifeArea() {
-        var lifeArea = new LifeArea();
-        lifeArea.setName("testArea");
-        lifeArea.setRate((byte) 8);
+            return user;
+        }
+    //endregion
 
-        return lifeArea;
-    }
+    //region TestLifeArea
+        public static LifeArea createTestLifeArea() {
+            return createTestLifeArea(1L, "testArea", (byte) 8);
+        }
 
-    public WheelOfLife createTestWheelOfLife() {
-        var wheelOfLife = new WheelOfLife();
-        var names = Set.of("health", "finance", "relationships");
-        var lifeAreas = names.stream().map(area -> {
+        public static LifeArea createTestLifeArea(Long id, String name, byte rate) {
             var lifeArea = new LifeArea();
-            lifeArea.setName(area);
-            lifeArea.setRate((byte) 8);
-            lifeArea.setWheelOfLife(wheelOfLife);
-            return lifeArea;
-        }).collect(Collectors.toSet());
-        wheelOfLife.setLifeAreas(lifeAreas);
+            lifeArea.setId(id);
+            lifeArea.setName(name);
+            lifeArea.setRate(rate);
 
-        return wheelOfLife;
-    }
+            return lifeArea;
+        }
+    //endregion
+
+    //region TestWheelOfLife
+        public WheelOfLife createTestWheelOfLifeWithAreas() {
+            var wheelOfLife = createTestWheelOfLife(1L);
+            var names = Set.of("health", "finance", "relationships");
+            var lifeAreas = new HashSet<LifeArea>();
+
+            var id = 1L;
+            for (String name : names) {
+                var lifeArea = new LifeArea();
+                lifeArea.setId(id++);
+                lifeArea.setName(name);
+                lifeArea.setRate((byte) 8);
+                lifeArea.setWheelOfLife(wheelOfLife);
+                lifeAreas.add(lifeArea);
+            }
+
+            wheelOfLife.setLifeAreas(lifeAreas);
+
+            return wheelOfLife;
+        }
+
+        public static WheelOfLife createTestWheelOfLife() {
+            return createTestWheelOfLife(1L);
+        }
+
+        public static WheelOfLife createTestWheelOfLife(Long id) {
+            return createTestWheelOfLife(id, new HashSet<>());
+        }
+
+        public static WheelOfLife createTestWheelOfLife(Long id, Set<LifeArea> lifeAreas) {
+            var wheelOfLife = new WheelOfLife();
+            wheelOfLife.setId(id);
+            wheelOfLife.setLifeAreas(lifeAreas);
+
+            return wheelOfLife;
+        }
+    //endregion
+
+    //region TestLifeAreaCreateDTO
+        public LifeAreaCreateDTO createTestLifeAreaCreateDTO() {
+            return createTestLifeAreaCreateDTO("testArea");
+        }
+
+        public LifeAreaCreateDTO createTestLifeAreaCreateDTO(String name) {
+            var lifeAreaCreateDTO = new LifeAreaCreateDTO();
+            lifeAreaCreateDTO.setName(name);
+            lifeAreaCreateDTO.setRate((byte) 8);
+
+            return lifeAreaCreateDTO;
+        }
+    //endregion
 }
