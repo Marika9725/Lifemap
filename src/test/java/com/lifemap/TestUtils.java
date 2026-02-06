@@ -2,8 +2,14 @@ package com.lifemap;
 
 import com.lifemap.model.*;
 import com.lifemap.model.projection.LifeAreaCreateDTO;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import java.util.*;
+
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 
 public class TestUtils {
 
@@ -96,4 +102,33 @@ public class TestUtils {
             return lifeAreaCreateDTO;
         }
     //endregion
+
+    public MockHttpServletRequestBuilder buildRequest(String method, String params) {
+        MockHttpServletRequestBuilder request;
+        final String URL = "/dashboard/wheelOfLife";
+
+        switch(method) {
+            case "GET" -> request = get(URL);
+            case "POST" -> request = post(URL);
+            case "DELETE" -> request = delete(URL);
+            case "PATCH" -> request = patch(URL);
+            default -> throw new IllegalArgumentException("Method " + method + " not supported");
+        }
+
+        if (!method.equals("GET")) request = request.with(csrf());
+
+        if (params != null && !params.trim().isEmpty()) {
+            var pairs = params.split("&");
+            for(String pair : pairs) {
+                if (pair.endsWith("="))
+                    request = request.param(pair.substring(0, pair.length() - 1), "");
+                else {
+                    var p = pair.split("=");
+                    request = request.param(p[0], p[1]);
+                }
+            }
+        }
+
+        return request;
+    }
 }

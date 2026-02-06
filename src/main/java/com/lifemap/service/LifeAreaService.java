@@ -39,6 +39,18 @@ public class LifeAreaService {
         return lifeAreaRepository.deleteByIdReturningCount(lifeAreaId) == 1;
     }
 
+    @Transactional
+    public boolean updateRate(Long lifeAreaId, byte rate) {
+        if (lifeAreaId == null || lifeAreaId < 0) return false;
+        if (rate < 0 || rate > 10) return false;
+
+        return lifeAreaRepository.findById(lifeAreaId)
+                .map(lifeArea -> {
+                    lifeArea.setRate(rate);
+                    return true;
+                }).orElse(false);
+    }
+
     private void checkLifeAreaData(LifeAreaCreateDTO toSave, WheelOfLife wheelOfLife, BindingResult result) {
         if (toSave.getName() == null || toSave.getName().isBlank()) {
             result.rejectValue("name", "lifeArea.invalid.name");

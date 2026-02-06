@@ -3,6 +3,7 @@ package com.lifemap.service;
 import com.lifemap.TestUtils;
 import com.lifemap.model.*;
 import com.lifemap.model.projection.*;
+import jakarta.validation.constraints.Null;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -137,6 +138,60 @@ public class LifeAreaServiceUnitTest {
             //then
             assertTrue(result);
             verify(lifeAreaRepository, times(1)).deleteByIdReturningCount(1L);
+        }
+    }
+
+    @Nested
+    public class UpdateRateTests{
+
+        @ParameterizedTest
+        @NullSource
+        @ValueSource(longs = {-1L})
+        void shouldReturnFalseWhenIdIsInvalid(Long lifeAreaId) {
+            //given + when
+            var result = lifeAreaService.updateRate(lifeAreaId, (byte) 5);
+
+            //then
+            assertFalse(result);
+            verify(lifeAreaRepository, never()).findById(anyLong());
+        }
+
+        @ParameterizedTest
+        @ValueSource(bytes = {-1, 11})
+        void shouldReturnFalseWhenRateIsInvalid(byte lifeAreaRate) {
+            //given + when
+            var result = lifeAreaService.updateRate(1L, lifeAreaRate);
+
+            //then
+            assertFalse(result);
+            verify(lifeAreaRepository, never()).findById(anyLong());
+        }
+
+        @Test
+        void shouldReturnFalseWhenLifeAreaNotFound() {
+            //given
+            when(lifeAreaRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+            //when
+            var result = lifeAreaService.updateRate(1L, (byte) 5);
+
+            //then
+            assertFalse(result);
+            verify(lifeAreaRepository, times(1)).findById(anyLong());
+        }
+
+        @Test
+        void shouldReturnTrueWhenLifeAreaRateIsSuccessfullyChanged() {
+            //given
+            var lifeArea = TestUtils.createTestLifeArea();
+            when(lifeAreaRepository.findById(anyLong())).thenReturn(Optional.of(lifeArea));
+
+            //when
+            var result = lifeAreaService.updateRate(1L, (byte) 5);
+
+            //then
+            assertTrue(result);
+            verify(lifeAreaRepository, times(1)).findById(anyLong());
         }
     }
 }

@@ -65,6 +65,22 @@ public class WheelOfLifeController {
         );
     }
 
+    @PostMapping(params = "action=patch")
+    public String patchLifeAreaRate(
+            @AuthenticationPrincipal User actualUser,
+            @RequestParam Long lifeAreaId,
+            @RequestParam byte lifeAreaRate,
+            Model model
+    ) {
+
+        return handleLifeAreaOperation(
+                actualUser,
+                model,
+                wheel -> lifeAreaService.updateRate(lifeAreaId, lifeAreaRate),
+                new LifeAreaCreateDTO()
+        );
+    }
+
     private String handleLifeAreaOperation(
             User actualUser,
             Model model,

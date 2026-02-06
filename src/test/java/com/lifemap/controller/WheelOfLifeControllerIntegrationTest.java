@@ -13,9 +13,12 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.*;
 
+import java.util.stream.Collectors;
+
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -55,11 +58,7 @@ public class WheelOfLifeControllerIntegrationTest {
             userRepository.save(user);
 
             //when + then
-            mockMvc.perform(post("/dashboard/wheelOfLife")
-                            .with(csrf())
-                            .param("name", "spirituality")
-                            .param("rate", "8")
-                    )
+            mockMvc.perform(testUtils.buildRequest("POST", "name=spirituality&rate=8"))
                     .andExpect(status().is3xxRedirection())
                     .andExpect(redirectedUrl("/dashboard/wheelOfLife"));
 
@@ -87,11 +86,7 @@ public class WheelOfLifeControllerIntegrationTest {
             userRepository.save(user);
 
             //when + then
-            mockMvc.perform(post("/dashboard/wheelOfLife")
-                            .with(csrf())
-                            .param("name", "")
-                            .param("rate", "8")
-                    )
+            mockMvc.perform(testUtils.buildRequest("POST", "name=&rate=8"))
                     .andExpect(status().isOk())
                     .andExpect(view().name("dashboard_wheelOfLife"));
 
@@ -113,19 +108,12 @@ public class WheelOfLifeControllerIntegrationTest {
         @Test
         public void shouldSuccessfullyRemoveLifeAreaFromDatabase() throws Exception {
             //given
-            var user = testUtils.createTestUserWithWheelOfLifeAndLifeAreas();
-            user.setId(null);
-            user.getWheelOfLife().setId(null);
-            user.getWheelOfLife().getLifeAreas().forEach(la -> la.setId(null));
+            var user = createTestUserWithWheelOfLifeAndLifeAreasWithoutIds();
 
             userRepository.save(user);
 
             //when+then
-            mockMvc.perform(post("/dashboard/wheelOfLife")
-                            .with(csrf())
-                            .param("lifeAreaId", "1")
-                            .param("action", "delete")
-                    )
+            mockMvc.perform(testUtils.buildRequest("POST", "lifeAreaId=1&action=delete"))
                     .andExpect(status().is3xxRedirection())
                     .andExpect(redirectedUrl("/dashboard/wheelOfLife"));
 
@@ -138,20 +126,13 @@ public class WheelOfLifeControllerIntegrationTest {
         @Test
         public void shouldNotRemoveLifeAreaWhenGivenDataIsInvalid() throws Exception {
             //given
-            var user = testUtils.createTestUserWithWheelOfLifeAndLifeAreas();
-            user.setId(null);
-            user.getWheelOfLife().setId(null);
-            user.getWheelOfLife().getLifeAreas().forEach(la -> la.setId(null));
+            var user = createTestUserWithWheelOfLifeAndLifeAreasWithoutIds();
 
             userRepository.save(user);
             var lifeAreaSizeBefore = user.getWheelOfLife().getLifeAreas().size();
 
             //when+then
-            mockMvc.perform(post("/dashboard/wheelOfLife")
-                            .with(csrf())
-                            .param("lifeAreaId", "-1")
-                            .param("action", "delete")
-                    )
+            mockMvc.perform(testUtils.buildRequest("POST", "lifeAreaId=-1&action=delete"))
                     .andExpect(status().isOk())
                     .andExpect(view().name("dashboard_wheelOfLife"));
 
@@ -161,5 +142,65 @@ public class WheelOfLifeControllerIntegrationTest {
             assertThat(lifeAreas.size(), is(lifeAreaSizeBefore));
 
         }
+    }
+
+    @Nested
+    @WithMockUser(username = "user@example.com", roles="USER")
+    public class PatchLifeAreaRateTests {
+
+        @Test
+        public void shouldNotModifyLifeAreaWhenGivenDataIsInvalid() throws Exception {
+            //given
+            var user = createTestUserWithWheelOfLifeAndLifeAreasWithoutIds();
+            userRepository.save(user);
+
+            var ratesBefore = lifeAreaRepository.findById(1L).stream()
+                            .collect(Collectors.toMap(LifeArea::getId, LifeArea::getRate));
+
+            //when + then
+            mockMvc.perform(testUtils.buildRequest("POST", "action=patch&lifeAreaId=1&lifeAreaRate=-1"))
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("dashboard_wheelOfLife"));
+
+            var ratesAfter = lifeAreaRepository.findById(1L).stream()
+                    .collect(Collectors.toMap(LifeArea::getId, LifeArea::getRate));
+
+            assertThat(ratesAfter, is(ratesBefore));
+
+        }
+
+        @Test
+        public void shouldSuccessfullyPatchLifeAreaRate() throws Exception {
+            //given
+            var user = createTestUserWithWheelOfLifeAndLifeAreasWithoutIds();
+            userRepository.save(user);
+
+            var lifeAreaRateBefore = lifeAreaRepository.findById(1L)
+                    .map(LifeArea::getRate)
+                    .orElse(null);
+
+            //when + then
+            mockMvc.perform(testUtils.buildRequest("POST", "action=patch&lifeAreaId=1&lifeAreaRate=10"))
+                    .andExpect(status().is3xxRedirection())
+                    .andExpect(redirectedUrl("/dashboard/wheelOfLife"));
+
+            var lifeAreaRateAfter = lifeAreaRepository.findById(1L)
+                    .map(LifeArea::getRate)
+                    .orElse(null);
+
+            assertNotNull(lifeAreaRateBefore);
+            assertNotNull(lifeAreaRateAfter);
+            assertThat(lifeAreaRateAfter, is(not(lifeAreaRateBefore)));
+            assertThat(lifeAreaRateAfter, is((byte) 10));
+        }
+    }
+
+    public User createTestUserWithWheelOfLifeAndLifeAreasWithoutIds() {
+        var user = testUtils.createTestUserWithWheelOfLifeAndLifeAreas();
+        user.setId(null);
+        user.getWheelOfLife().setId(null);
+        user.getWheelOfLife().getLifeAreas().forEach(la -> la.setId(null));
+
+        return user;
     }
 }

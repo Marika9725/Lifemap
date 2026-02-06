@@ -92,7 +92,9 @@ span.bold {
     margin-top: auto;
 }
 
-.addLifeArea form input {
+.addLifeArea form input,
+.scrollable-table form input
+{
     background: #2A2A2A;
     border: none;
     border-radius: 10px;
@@ -221,4 +223,9 @@ a {
 
 a:hover {
     font-weight: bold;
+}
+
+.scrollable-table form input {
+    padding: 5px 6px;
+    width: 35px;
 }
