@@ -2,8 +2,7 @@ package com.lifemap.service;
 
 import com.lifemap.TestUtils;
 import com.lifemap.model.*;
-import com.lifemap.model.projection.*;
-import jakarta.validation.constraints.Null;
+import com.lifemap.model.projection.LifeAreaReadDTO;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -13,6 +12,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.validation.BeanPropertyBindingResult;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -74,7 +74,7 @@ public class LifeAreaServiceUnitTest {
             assertThat(sizeAfter, is(sizeBefore));
         }
 
-       @Test
+        @Test
         public void shouldReturnTrueWhenLifeAreaIsSuccessfullySaved() {
             //given
             var lifeAreaDTO = testUtils.createTestLifeAreaCreateDTO("health");
@@ -101,7 +101,7 @@ public class LifeAreaServiceUnitTest {
         }
     }
 
-   @Nested
+    @Nested
     public class DeleteLifeAreaTests {
         @ParameterizedTest
         @NullSource
@@ -142,7 +142,7 @@ public class LifeAreaServiceUnitTest {
     }
 
     @Nested
-    public class UpdateRateTests{
+    public class UpdateRateTests {
 
         @ParameterizedTest
         @NullSource
@@ -192,6 +192,140 @@ public class LifeAreaServiceUnitTest {
             //then
             assertTrue(result);
             verify(lifeAreaRepository, times(1)).findById(anyLong());
+        }
+    }
+
+    @Nested
+    public class GetSortedLifeAreasTests {
+        @ParameterizedTest
+        @NullSource
+        @ValueSource(longs = -1)
+        public void shouldReturnEmptyListWhenWheelOfLifeIsValid(Long wheelOfLifeId) {
+            //given + when
+            var result = lifeAreaService.getSortedLifeAreas(wheelOfLifeId, SortBy.NAME_ASC);
+
+            //then
+            assertThat(result, is(List.of()));
+            assertThat(result.size(), is(0));
+        }
+
+        @Test
+        public void shouldReturnEmptyListWhenLifeAreasNotFound() {
+            //given
+            when(lifeAreaRepository.findAllByWheelOfLifeId(anyLong())).thenReturn(List.of());
+
+            //when
+            var result = lifeAreaService.getSortedLifeAreas(1L, SortBy.NAME_ASC);
+
+            //then
+            assertThat(result, is(List.of()));
+            assertThat(result.size(), is(0));
+        }
+
+        @Test
+        public void shouldSortByNameAscendingWhenSortByIsNull() {
+            //given
+            var lifeAreas = testUtils.createTestLifeAreas();
+            var namesExpected = lifeAreas.stream().map(LifeArea::getName).sorted().toList();
+            when(lifeAreaRepository.findAllByWheelOfLifeId(anyLong())).thenReturn(lifeAreas);
+
+            //when
+            var result = lifeAreaService.getSortedLifeAreas(1L, null);
+            var namesActual = result.stream().map(LifeAreaReadDTO::getName).toList();
+
+            //then
+            assertThat(namesActual, is(namesExpected));
+        }
+
+        @ParameterizedTest
+        @MethodSource("getSortStrategy")
+        public void shouldSortLifeAreasCorrectly(Comparator<LifeArea> comparator, SortBy sortBy) {
+            //given
+            var lifeAreas = testUtils.createTestLifeAreas();
+            var namesOrderExpected = lifeAreas.stream().sorted(comparator).map(LifeArea::getName).toList();
+
+            when(lifeAreaRepository.findAllByWheelOfLifeId(anyLong())).thenReturn(lifeAreas);
+
+            //when
+            var result = lifeAreaService.getSortedLifeAreas(1L, sortBy);
+            var namesOrderActual = result.stream().map(LifeAreaReadDTO::getName).toList();
+
+            //then
+            assertThat(namesOrderActual, is(namesOrderExpected));
+        }
+
+        public static Stream<Arguments> getSortStrategy() {
+            return Stream.of(
+                    Arguments.of(Comparator.comparing(LifeArea::getName), SortBy.NAME_ASC),
+                    Arguments.of(Comparator.comparing(LifeArea::getName).reversed(), SortBy.NAME_DESC),
+                    Arguments.of(Comparator.comparing(LifeArea::getRate), SortBy.RATE_ASC),
+                    Arguments.of(Comparator.comparing(LifeArea::getRate).reversed(), SortBy.RATE_DESC)
+            );
+        }
+    }
+
+    @Nested
+    public class GetWorstLifeAreasTests {
+        @Test
+        public void shouldReturnEmptyListWhenWheelOfLifeIdIsNull() {
+            //given + when
+            var result = lifeAreaService.getWorstLifeAreas(null, 5.5);
+
+            //then
+            verify(lifeAreaRepository, never()).findAllByWheelOfLifeId(anyLong());
+            assertThat(result, is(List.of()));
+            assertThat(result.size(), is(0));
+        }
+
+        @Test
+        public void shouldReturnEmptyListWhenAverageIsZero() {
+            // given
+            var lifeAreas = testUtils.createTestLifeAreas();
+            when(lifeAreaRepository.findAllByWheelOfLifeId(anyLong())).thenReturn(lifeAreas);
+
+            // when
+            var result = lifeAreaService.getWorstLifeAreas(1L, 0.0);
+
+            //then
+            verify(lifeAreaRepository, times(1)).findAllByWheelOfLifeId(anyLong());
+            assertThat(result, is(List.of()));
+            assertThat(result.size(), is(0));
+        }
+
+        @Test
+        public void shouldReturnEmptyListWhenThereAreNoLifeAreasBelowAverage() {
+            //given
+            var lifeAreas = testUtils.createTestLifeAreas();
+            lifeAreas.forEach(la -> la.setRate((byte) 8));
+
+            when(lifeAreaRepository.findAllByWheelOfLifeId(anyLong())).thenReturn(lifeAreas);
+
+            //when
+            var result = lifeAreaService.getWorstLifeAreas(1L, 8.0);
+
+            //then
+            verify(lifeAreaRepository, times(1)).findAllByWheelOfLifeId(anyLong());
+            assertThat(result, is(List.of()));
+            assertThat(result.size(), is(0));
+        }
+
+        @Test
+        public void shouldReturnLifeAreasWithRatesBelowAverage() {
+            // given
+            var lifeAreas = testUtils.createTestLifeAreas();
+            var average = (double) (lifeAreas.stream().mapToInt(LifeArea::getRate).sum() / lifeAreas.size());
+            var expected = lifeAreas.stream().filter(la -> la.getRate() < Math.ceil(average)).toList();
+
+            when(lifeAreaRepository.findAllByWheelOfLifeId(anyLong())).thenReturn(lifeAreas);
+
+            // when
+            var actual = lifeAreaService.getWorstLifeAreas(1L, average);
+
+            // then
+            verify(lifeAreaRepository, times(1)).findAllByWheelOfLifeId(anyLong());
+            assertThat(actual, is(List.of()));
+            assertThat(actual.size(), is(expected.size()));
+            assertTrue(actual.stream().allMatch(la -> la.getRate() < Math.ceil(average)));
         }
     }
 }

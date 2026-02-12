@@ -49,25 +49,32 @@ public class TestUtils {
 
             return lifeArea;
         }
+
+        public List<LifeArea> createTestLifeAreas() {
+            var names = Set.of("health", "finance", "relationships");
+            var lifeAreas = new ArrayList<LifeArea>();
+
+            var id = 1L;
+            for (String name : names) {
+                var lifeArea = new LifeArea();
+                lifeArea.setId(id);
+                lifeArea.setName(name);
+                lifeArea.setRate((byte) id);
+                lifeAreas.add(lifeArea);
+            }
+
+            return lifeAreas;
+        }
+
     //endregion
 
     //region TestWheelOfLife
         public WheelOfLife createTestWheelOfLifeWithAreas() {
             var wheelOfLife = createTestWheelOfLife(1L);
-            var names = Set.of("health", "finance", "relationships");
-            var lifeAreas = new HashSet<LifeArea>();
+            var lifeAreas = createTestLifeAreas();
 
-            var id = 1L;
-            for (String name : names) {
-                var lifeArea = new LifeArea();
-                lifeArea.setId(id++);
-                lifeArea.setName(name);
-                lifeArea.setRate((byte) 8);
-                lifeArea.setWheelOfLife(wheelOfLife);
-                lifeAreas.add(lifeArea);
-            }
-
-            wheelOfLife.setLifeAreas(lifeAreas);
+            lifeAreas.forEach(lifeArea -> lifeArea.setWheelOfLife(wheelOfLife));
+            wheelOfLife.setLifeAreas(Set.copyOf(lifeAreas));
 
             return wheelOfLife;
         }

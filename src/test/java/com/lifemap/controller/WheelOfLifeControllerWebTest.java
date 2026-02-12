@@ -7,32 +7,28 @@ import com.lifemap.model.projection.*;
 import com.lifemap.service.*;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.*;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.test.context.support.*;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.*;
-import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.validation.BindingResult;
 
 import java.util.*;
-import java.util.stream.Stream;
 
 import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(WheelOfLifeController.class)
 @Import(SecurityConfig.class)
 class WheelOfLifeControllerWebTest {
-   @Autowired
+    @Autowired
     private MockMvc mockMvc;
 
     @MockitoBean
@@ -109,9 +105,26 @@ class WheelOfLifeControllerWebTest {
                             instanceOf(LifeAreaCreateDTO.class),
                             hasProperty("name", nullValue()),
                             hasProperty("rate", is((byte) 0))
-                    )));
+                    )))
+                    .andExpect(model().attribute("sortBy", SortBy.NAME_ASC))
+                    .andExpect(model().attribute("worstAreas", instanceOf(List.class)))
+            ;
         }
 
+        @Test
+        @WithMockUser
+        public void shouldReturnWheelOfLifePageWithCorrespondingSortByArg() throws Exception {
+            //given
+            var user = testUtils.createTestUserWithWheelOfLifeAndLifeAreas();
+
+            when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
+
+            //when + then
+            mockMvc.perform(testUtils.buildRequest("GET", "sortBy=RATE_DESC"))
+                    .andExpect(status().isOk())
+                    .andExpect(view().name("dashboard_wheelOfLife"))
+                    .andExpect(model().attribute("sortBy", SortBy.RATE_DESC));
+        }
     }
 
     @Nested
@@ -201,6 +214,7 @@ class WheelOfLifeControllerWebTest {
 
             when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
             when(lifeAreaService.removeLifeArea(anyLong())).thenReturn(false);
+            when(lifeAreaService.getSortedLifeAreas(anyLong(), any())).thenReturn(wheelOfLifeReadDTO.getLifeAreas());
 
             //when + then
             mockMvc.perform(testUtils.buildRequest("POST", "action=delete&lifeAreaId=1"))

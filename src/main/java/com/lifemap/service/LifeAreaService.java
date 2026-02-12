@@ -6,6 +6,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
 
+import java.util.*;
+import java.util.stream.Collectors;
+
 @Service
 public class LifeAreaService {
 
@@ -34,14 +37,14 @@ public class LifeAreaService {
 
     @Transactional
     public boolean removeLifeArea(Long lifeAreaId) {
-        if (lifeAreaId == null || lifeAreaId < 0) return false;
+        if (checkId(lifeAreaId)) return false;
 
         return lifeAreaRepository.deleteByIdReturningCount(lifeAreaId) == 1;
     }
 
     @Transactional
     public boolean updateRate(Long lifeAreaId, byte rate) {
-        if (lifeAreaId == null || lifeAreaId < 0) return false;
+        if (checkId(lifeAreaId)) return false;
         if (rate < 0 || rate > 10) return false;
 
         return lifeAreaRepository.findById(lifeAreaId)
@@ -49,6 +52,37 @@ public class LifeAreaService {
                     lifeArea.setRate(rate);
                     return true;
                 }).orElse(false);
+    }
+
+    public List<LifeAreaReadDTO> getSortedLifeAreas(Long wheelOfLifeId, SortBy sort) {
+        if (checkId(wheelOfLifeId)) return List.of();
+        sort = (sort == null) ? SortBy.NAME_ASC : sort;
+
+        return lifeAreaRepository.findAllByWheelOfLifeId(wheelOfLifeId).stream()
+                .sorted(
+                        switch(sort) {
+                            case NAME_DESC -> Comparator.comparing(LifeArea::getName).reversed();
+                            case RATE_ASC -> Comparator.comparing(LifeArea::getRate);
+                            case RATE_DESC -> Comparator.comparing(LifeArea::getRate).reversed();
+                            default -> Comparator.comparing(LifeArea::getName);
+                        }
+                )
+                .map(LifeAreaReadDTO::new)
+                .collect(Collectors.toList());
+    }
+
+    public List<LifeAreaReadDTO> getWorstLifeAreas(Long wheelOfLifeId, double average) {
+        if (checkId(wheelOfLifeId)) return List.of();
+
+        return lifeAreaRepository.findAllByWheelOfLifeId(wheelOfLifeId).stream()
+                .filter(la -> la.getRate() < Math.ceil(average))
+                .map(LifeAreaReadDTO::new)
+                .collect(Collectors.toList());
+
+    }
+
+    private boolean checkId(Long id) {
+        return (id == null) || (id < 0);
     }
 
     private void checkLifeAreaData(LifeAreaCreateDTO toSave, WheelOfLife wheelOfLife, BindingResult result) {

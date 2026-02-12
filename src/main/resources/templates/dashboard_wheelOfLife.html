@@ -34,10 +34,25 @@
                 <div class="rightPart">
                     <h2 th:text="#{html.wheelOfLifePage.header}">Obszary życia</h2>
 
+                    <div class="sort">
+                        <span th:text="#{html.wheelOfLifePage.sort}">Sortuj:</span>
+                        <a th:href="@{/dashboard/wheelOfLife(sortBy=${sortBy.name() == 'NAME_ASC' ? 'NAME_DESC' : 'NAME_ASC'})}" class="sortedButton">
+                            <span th:if="${sortBy.name() == 'NAME_ASC'}" th:text="#{html.wheelOfLifePage.sortByNameAsc}"/>
+                            <span th:if="${sortBy.name() == 'NAME_DESC'}" th:text="#{html.wheelOfLifePage.sortByNameDesc}"/>
+                            <span th:if="${sortBy.name() != 'NAME_ASC' && sortBy.name() != 'NAME_DESC'}" th:text="#{html.wheelOfLifePage.sortByName}"/>
+                        </a>
+                        <a th:href="@{/dashboard/wheelOfLife(sortBy=${sortBy.name() == 'RATE_ASC' ? 'RATE_DESC' : 'RATE_ASC'})}" class="sortedButton">
+                            <span th:if="${sortBy.name() == 'RATE_ASC'}" th:text="#{html.wheelOfLifePage.sortByRateAsc}"/>
+                            <span th:if="${sortBy.name() == 'RATE_DESC'}" th:text="#{html.wheelOfLifePage.sortByRateDesc}"/>
+                            <span th:if="${sortBy.name() != 'RATE_ASC' && sortBy.name() != 'RATE_DESC'}" th:text="#{html.wheelOfLifePage.sortByRate}"/>
+                        </a>
+                    </div>
+
                     <div class="scrollable-table">
                         <table>
                             <tr th:each="area : ${areas}">
                                 <td>
+                                    <span th:if="${worstAreas.contains(area)}">(!)</span>
                                     <a href="#" th:text="${area.name}">-</a>
                                 </td>
                                 <td>
@@ -75,7 +90,7 @@
                         <form method="post" th:action="@{/dashboard/wheelOfLife}" th:object="${newLifeArea}">
                             <input type="text" maxLength="20" th:placeholder="#{html.wheelOfLifePage.areaName}" th:field="*{name}"/>
                             <input type="number" min="0" max="10" th:placeholder="#{html.wheelOfLifePage.areaRate}" th:field="*{rate}"/>
-                            <button type="submit" th:text="#{html.wheelOfLifePage.button.addArea}">Dodaj obszar</button>
+                            <button type="submit" th:text="#{html.wheelOfLifePage.button.addArea}" th:title="#{html.wheelOfLifePage.button.addArea}">Dodaj obszar</button>
                             <div class="errors" th:if="${#fields.hasAnyErrors()}">
                                 <p class="error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></p>
                                 <p class="error" th:if="${#fields.hasErrors('rate')}" th:errors="*{rate}"></p>

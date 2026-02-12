@@ -1,5 +1,7 @@
 package com.lifemap.model;
 
+import org.springframework.lang.NonNull;
+
 import java.util.*;
 
 public interface UserRepository {
@@ -8,4 +10,5 @@ public interface UserRepository {
     boolean existsByEmail(String email);
     boolean existsByUsername(String username);
 //    boolean deleteByEmail(String email);
+    void deleteById(@NonNull Long id);
 }

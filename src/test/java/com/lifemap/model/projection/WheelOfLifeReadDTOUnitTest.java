@@ -45,20 +45,5 @@ public class WheelOfLifeReadDTOUnitTest {
         assertThat(dtoNames, containsInAnyOrder(originalNames));
     }
 
-    @Test
-    public void shouldReturnSortedLifeAreasDTOByName() {
-        //given
-        var wheelOfLifeDTO = new WheelOfLifeReadDTO(testUtils.createTestWheelOfLifeWithAreas());
-        var sortedNames = new String[]{"finance", "health", "relationships"};
-
-        //when
-        var names = wheelOfLifeDTO.getLifeAreas()
-                .stream()
-                .map(LifeAreaReadDTO::getName)
-                .collect(Collectors.toList());
-
-        //then
-        assertThat(names, containsInRelativeOrder(sortedNames));
-    }
 }
 

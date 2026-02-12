@@ -22,7 +22,7 @@ spring:
         cache: false
   devtools:
     livereload:
-      enabled: false
+      enabled: true
 
 server:
   servlet:

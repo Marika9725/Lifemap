@@ -1,11 +1,10 @@
 package com.lifemap.model.projection;
 
-import com.lifemap.model.WheelOfLife;
+import com.lifemap.model.*;
 import lombok.Getter;
 import org.springframework.lang.NonNull;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Getter
 public class WheelOfLifeReadDTO {
@@ -23,8 +22,6 @@ public class WheelOfLifeReadDTO {
     }
 
     public List<LifeAreaReadDTO> getLifeAreas() {
-        return lifeAreas.stream()
-                .sorted(Comparator.comparing(LifeAreaReadDTO::getName))
-                .collect(Collectors.toList());
+        return new ArrayList<>(lifeAreas);
     }
 }

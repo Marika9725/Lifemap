@@ -5,7 +5,9 @@ import lombok.*;
 import org.springframework.lang.NonNull;
 
 @Getter
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class LifeAreaReadDTO{
+    @EqualsAndHashCode.Include
     private final Long id;
     private final String name;
     private final byte rate;
