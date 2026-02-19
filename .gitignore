@@ -31,3 +31,8 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Others ###
+*.mv.db
+*.trace.db
+*/src/excluded/
