@@ -313,7 +313,10 @@ public class LifeAreaServiceUnitTest {
         public void shouldReturnLifeAreasWithRatesBelowAverage() {
             // given
             var lifeAreas = testUtils.createTestLifeAreas();
-            var average = (double) (lifeAreas.stream().mapToInt(LifeArea::getRate).sum() / lifeAreas.size());
+            var average = lifeAreas.stream()
+                    .mapToDouble(LifeArea::getRate)
+                    .average()
+                    .orElse(0.0);
             var expected = lifeAreas.stream().filter(la -> la.getRate() < Math.ceil(average)).toList();
 
             when(lifeAreaRepository.findAllByWheelOfLifeId(anyLong())).thenReturn(lifeAreas);
@@ -323,7 +326,6 @@ public class LifeAreaServiceUnitTest {
 
             // then
             verify(lifeAreaRepository, times(1)).findAllByWheelOfLifeId(anyLong());
-            assertThat(actual, is(List.of()));
             assertThat(actual.size(), is(expected.size()));
             assertTrue(actual.stream().allMatch(la -> la.getRate() < Math.ceil(average)));
         }

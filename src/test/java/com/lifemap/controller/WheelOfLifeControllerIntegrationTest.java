@@ -49,16 +49,18 @@ public class WheelOfLifeControllerIntegrationTest {
         public void shouldReturnWheelOfLifePageWithCorrectListOfWorstLifeAreas() throws Exception {
             //given
             var user = createTestUserWithWheelOfLifeAndLifeAreasWithoutIds();
+
+            userRepository.save(user);
+
             var average = user.getWheelOfLife().getLifeAreas().stream()
                     .mapToInt(LifeArea::getRate)
                     .average()
                     .orElse(0);
 
             var expected = user.getWheelOfLife().getLifeAreas().stream()
+                    .map(LifeAreaReadDTO::new)
                     .filter(la -> la.getRate() < Math.ceil(average))
                     .toList();
-
-            userRepository.save(user);
 
             //when+then
             mockMvc.perform(testUtils.buildRequest("GET", null))

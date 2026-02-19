@@ -206,15 +206,14 @@ class WheelOfLifeControllerWebTest {
         public void shouldReturnOldWheelOfLifePageWhenDeletingLifeAreaFails() throws Exception {
             //given
             var user = testUtils.createTestUserWithWheelOfLifeAndLifeAreas();
-            var wheelOfLife = user.getWheelOfLife();
-            var wheelOfLifeReadDTO = new WheelOfLifeReadDTO(wheelOfLife);
+            var wheelOfLifeReadDTO = new WheelOfLifeReadDTO(user.getWheelOfLife());
 
             var averageBefore = wheelOfLifeService.calculateAverage(wheelOfLifeReadDTO.getLifeAreas());
-            var lifeAreasNumBefore = wheelOfLife.getLifeAreas().size();
+            var lifeAreasNumBefore = wheelOfLifeReadDTO.getLifeAreas().size();
 
             when(userRepository.findByEmail(anyString())).thenReturn(Optional.of(user));
             when(lifeAreaService.removeLifeArea(anyLong())).thenReturn(false);
-            when(lifeAreaService.getSortedLifeAreas(anyLong(), any())).thenReturn(wheelOfLifeReadDTO.getLifeAreas());
+            when(lifeAreaService.getSortedLifeAreas(anyLong(), isNull())).thenReturn(wheelOfLifeReadDTO.getLifeAreas());
 
             //when + then
             mockMvc.perform(testUtils.buildRequest("POST", "action=delete&lifeAreaId=1"))

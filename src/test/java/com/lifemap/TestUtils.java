@@ -13,7 +13,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 
 public class TestUtils {
 
-
     //region TestUser
         public User createTestUser() {
             var user = new User();
@@ -57,9 +56,9 @@ public class TestUtils {
             var id = 1L;
             for (String name : names) {
                 var lifeArea = new LifeArea();
-                lifeArea.setId(id);
+                lifeArea.setId(id++);
                 lifeArea.setName(name);
-                lifeArea.setRate((byte) id);
+                lifeArea.setRate((byte) id++);
                 lifeAreas.add(lifeArea);
             }
 

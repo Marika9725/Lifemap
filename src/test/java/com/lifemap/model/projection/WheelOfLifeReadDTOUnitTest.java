@@ -29,8 +29,7 @@ public class WheelOfLifeReadDTOUnitTest {
     public void shouldMapWheelOfLifeToReadDTO() {
         //given
         var wheelOfLife = testUtils.createTestWheelOfLifeWithAreas();
-        var lifeAreas = wheelOfLife.getLifeAreas();
-        var originalNames = lifeAreas.stream()
+        var originalNames = wheelOfLife.getLifeAreas().stream()
                 .map(LifeArea::getName)
                 .toArray();
 
@@ -38,10 +37,10 @@ public class WheelOfLifeReadDTOUnitTest {
         var wheelOfLifeDTO = new WheelOfLifeReadDTO(wheelOfLife);
         var dtoNames = wheelOfLifeDTO.getLifeAreas().stream()
                 .map(LifeAreaReadDTO::getName)
-                .collect(Collectors.toSet());
+                .collect(Collectors.toList());
 
         //then
-        assertThat(wheelOfLifeDTO.getLifeAreas().size(), is(lifeAreas.size()));
+        assertThat(dtoNames.size(), is(originalNames.length));
         assertThat(dtoNames, containsInAnyOrder(originalNames));
     }
 
