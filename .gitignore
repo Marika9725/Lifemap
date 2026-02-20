@@ -35,4 +35,4 @@ build/
 ### Others ###
 *.mv.db
 *.trace.db
-*/src/excluded/
+**/src/excluded/
